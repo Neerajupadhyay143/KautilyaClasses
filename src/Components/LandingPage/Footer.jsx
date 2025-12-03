@@ -1,0 +1,140 @@
+import React from 'react';
+import { useState, useEffect } from 'react';
+import { NavLink } from "react-router-dom";
+import {
+    Phone,
+    MapPin,
+    Mail,
+    Facebook,
+    Instagram,
+    Youtube,
+    Play
+} from 'lucide-react';
+
+import Logo from "../../assets/images/LandingPage/LOGO/Kautilya.png";
+
+function Footer() {
+
+    const Motion = ({ children, className, delay = 0, duration = 0.5 }) => {
+        const [isVisible, setIsVisible] = useState(false);
+        const ref = React.useRef(null);
+
+        useEffect(() => {
+            const observer = new IntersectionObserver(
+                ([entry]) => entry.isIntersecting && setIsVisible(true),
+                { threshold: 0.1 }
+            );
+
+            if (ref.current) observer.observe(ref.current);
+            return () => ref.current && observer.unobserve(ref.current);
+        }, []);
+
+        return (
+            <div
+                ref={ref}
+                className={className}
+                style={{
+                    opacity: isVisible ? 1 : 0,
+                    transform: isVisible ? "translateY(0)" : "translateY(25px)",
+                    transition: `all ${duration}s ease-out ${delay}s`
+                }}
+            >
+                {children}
+            </div>
+        );
+    };
+
+    return (
+        <footer className="bg-[#0f3069] text-gray-200 py-12">
+            <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+
+                {/* LEFT COLUMN - Logo + About + Social */}
+                <Motion delay={0.1}>
+                    <div>
+                        <img src={Logo} alt="Logo" className="w-24 h-24 rounded-full mb-4" />
+
+                        <p className="text-sm leading-relaxed mb-6">
+                            At Kautilya Vision Classes, we provide comprehensive
+                            preparation for all SSC exams. Whether you aspire to become an
+                            Income Tax Inspector through the SSC CGL Exam, secure a
+                            position in Central Police Forces via SSC CPO, or aim for
+                            government jobs through SSC CHSL and SSC MTS, we are here
+                            to guide you every step of the way.
+                        </p>
+
+                        {/* Social icons */}
+                        <div className="flex items-center gap-4">
+                            <span className="text-sm">Connect :</span>
+
+                            <a href="#" className="hover:text-[#ff6575]">
+                                <Facebook size={18} />
+                            </a>
+
+                            <a href="#" className="hover:text-[#ff6575]">
+                                <Instagram size={18} />
+                            </a>
+
+                            <a href="#" className="hover:text-[#ff6575]">
+                                <Youtube size={18} />
+                            </a>
+
+                            <a href="#" className="hover:text-[#ff6575]">
+                                <Play size={18} />
+                            </a>
+                        </div>
+                    </div>
+                </Motion>
+
+                {/* MIDDLE COLUMN - Courses */}
+                <Motion delay={0.2}>
+                    <div>
+                        <h3 className="text-xl font-semibold mb-4">Courses</h3>
+
+                        <ul className="space-y-2 text-sm">
+                            <NavLink to="/courses/bank" className="hover:text-[#ff6575] block">Bank</NavLink>
+                            <NavLink to="/courses/defence" className="hover:text-[#ff6575] block">Defence</NavLink>
+                            <NavLink to="/courses/delhi-police" className="hover:text-[#ff6575] block">Delhi Police</NavLink>
+                            <NavLink to="/courses/railway" className="hover:text-[#ff6575] block">Railway (RRB)</NavLink>
+                            <NavLink to="/courses/ssc" className="hover:text-[#ff6575] block">SSC</NavLink>
+                        </ul>
+
+                        <h3 className="text-xl font-semibold mt-8 mb-4">Quick Links</h3>
+                        <ul className="space-y-2 text-sm">
+                            <NavLink to="/privacy-policy" className="hover:text-[#ff6575] block">Privacy Policy</NavLink>
+                            <NavLink to="/terms" className="hover:text-[#ff6575] block">Terms & Conditions</NavLink>
+                        </ul>
+                    </div>
+                </Motion>
+
+                {/* RIGHT COLUMN - Address */}
+                <Motion delay={0.3}>
+                    <div>
+                        <h3 className="text-xl font-semibold mb-4">Address</h3>
+
+                        <p className="text-sm mb-4">+91 9996732928</p>
+
+                        <p className="text-sm mb-4">info@kautilyavisionclasses.com</p>
+
+                        <p className="text-sm leading-relaxed">
+                            2nd Floor, Delhi Rd, near<br />
+                            MDU Gate no. 2, opp.<br />
+                            Agro Mall, Maharshi<br />
+                            Dayanand University,<br />
+                            Rohtak, Haryana
+                        </p>
+                    </div>
+                </Motion>
+
+            </div>
+
+            {/* Bottom bar */}
+            <div className="text-center border-t border-white/10 mt-10 pt-6">
+                <p className="text-sm">
+                    © 2025 Kautilya Vision Classes. All rights reserved.
+                </p>
+            </div>
+        </footer>
+    );
+}
+
+export default Footer;
