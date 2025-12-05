@@ -67,7 +67,7 @@ export default function Navbar() {
                             <button
                                 onClick={() => setOpenLogin(true)}
                                 className="flex items-center gap-1 px-4 py-2 border border-[#ff6575] rounded-full 
-                                text-[#ff6575] hover:bg-[#ff6575] hover:text-white transition"
+                                 bg-[#ff6575] text-white transition"
                             >
                                 <UserRound className="h-4 w-4" />
                                 Login
@@ -108,7 +108,7 @@ export default function Navbar() {
 
                             <button
                                 onClick={() => { setOpenLogin(true); setIsMenuOpen(false); }}
-                                className="block border border-[#113471] text-[#113471] px-6 py-3 rounded-full text-center hover:bg-[#113471] hover:text-white transition"
+                                className="block w-full border border-[#113471] text-[#113471] px-6 py-3 rounded-full text-center hover:bg-[#113471] hover:text-white transition"
                             >
                                 Login
                             </button>

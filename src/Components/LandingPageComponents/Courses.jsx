@@ -96,7 +96,7 @@ const Courses = () => {
     }, [searchTerm, activeCategory]);
 
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col w-full">
             {/* Hero Section */}
             <section className="w-full bg-[#0f3069] py-28 text-center mt-40">
                 <h2 className="text-3xl sm:text-4xl font-bold text-gray-100">Indian Govt Exams</h2>
@@ -105,94 +105,103 @@ const Courses = () => {
                 </p>
             </section>
 
+
             {/* Filters + Search */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-8 px-4 sm:px-6 lg:px-8 bg-gray-50 flex-wrap">
+            <div className="w-full flex flex-col items-center py-8 px-4 sm:px-6 lg:px-8 bg-gray-50">
 
-                {/* Categories */}
-                <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
-                    {examCategories.map((cat, index) => (
-                        <button
-                            key={index}
-                            onClick={() => setActiveCategory(cat.name)}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm sm:text-base font-semibold transition-colors ${activeCategory === cat.name
-                                    ? "bg-[#ff6575] text-white border-[#ff6575]"
-                                    : "bg-white text-gray-700 border-gray-300 hover:bg-[#ff6575] hover:text-white"
-                                }`}
-                        >
-                            <cat.icon className="h-5 w-5 text-[#ff6575]" />
-                            {cat.name}
-                        </button>
-                    ))}
-                </div>
+                <div className="w-full max-w-5xl flex flex-col lg:flex-row items-center justify-between gap-6">
 
-                {/* Search */}
-                <div className="relative w-full sm:w-auto">
-                    <input
-                        type="text"
-                        placeholder="Search courses..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:ring-2 focus:ring-[#0f3069] focus:border-transparent text-sm sm:text-base outline-none w-full sm:w-64"
-                    />
-                    <Search className="absolute top-1/2 left-3 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    {/* Categories */}
+                    <div className="flex flex-wrap justify-center gap-4 w-full">
+                        {examCategories.map((cat, index) => (
+                            <button
+                                key={index}
+                                onClick={() => setActiveCategory(cat.name)}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm sm:text-base font-semibold transition-colors ${activeCategory === cat.name
+                                        ? "bg-[#ff6575] text-white border-[#ff6575]"
+                                        : "bg-white text-gray-700 border-gray-300 hover:bg-[#ff6575] hover:text-white"
+                                    }`}
+                            >
+                                <cat.icon className="h-5 w-5 text-[#ff6575]" />
+                                {cat.name}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Search */}
+                    <div className="relative w-full max-w-xs mx-auto">
+                        <input
+                            type="text"
+                            placeholder="Search courses..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:ring-2 focus:ring-[#0f3069] outline-none text-sm sm:text-base w-full"
+                        />
+                        <Search className="absolute top-1/2 left-3 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    </div>
                 </div>
             </div>
+
 
             {/* Courses Grid */}
             <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <AnimatePresence>
-                        {displayedCourses.length > 0 ? (
-                            displayedCourses.map((course) => (
-                                <motion.div
-                                    key={course.title}
-                                    initial={{ opacity: 0, y: 50 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: 50 }}
-                                    transition={{ duration: 0.5 }}
-                                    className="bg-white rounded-lg shadow-lg hover:shadow-2xl transition-shadow border-t-4 border-[#ff6575]"
+                <div className="max-w-6xl mx-auto">
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
+                        <AnimatePresence>
+                            {displayedCourses.length > 0 ? (
+                                displayedCourses.map((course) => (
+                                    <motion.div
+                                        key={course.title}
+                                        initial={{ opacity: 0, y: 50 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 50 }}
+                                        transition={{ duration: 0.5 }}
+                                        className="bg-white rounded-lg shadow-lg hover:shadow-2xl transition-shadow border-t-4 border-[#ff6575]"
+                                    >
+                                        {/* Image */}
+                                        <img
+                                            src={course.image}
+                                            alt={course.title}
+                                            className="w-full h-40 object-cover rounded-t-lg"
+                                        />
+
+                                        <div className="p-6">
+                                            <div className="flex items-center gap-3 mb-4">
+                                                <course.icon className="h-6 w-6 text-[#ff6575]" />
+                                                <h3 className="text-xl font-bold text-[#0f3069]">
+                                                    {course.title}
+                                                </h3>
+                                            </div>
+
+                                            <p className="text-gray-700 mb-4">{course.description}</p>
+
+                                            <div className="flex justify-between text-sm sm:text-base text-gray-600 font-semibold mb-4">
+                                                <span>{course.duration}</span>
+                                                <span>{course.level}</span>
+                                            </div>
+
+                                            <button className="w-full bg-[#0f3069] hover:bg-[#ff6575] text-white font-bold py-2 px-4 rounded-full transition-colors text-sm sm:text-base">
+                                                Enroll Now
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                ))
+                            ) : (
+                                <motion.p
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="text-center col-span-full text-gray-500 text-lg font-semibold"
                                 >
-                                    {/* Image */}
-                                    <img
-                                        src={course.image}
-                                        alt={course.title}
-                                        className="w-full h-40 object-cover rounded-t-lg"
-                                    />
-
-                                    <div className="p-6">
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <course.icon className="h-6 w-6 text-[#ff6575]" />
-                                            <h3 className="text-xl font-bold text-[#0f3069]">
-                                                {course.title}
-                                            </h3>
-                                        </div>
-
-                                        <p className="text-gray-700 mb-4">{course.description}</p>
-
-                                        <div className="flex justify-between items-center text-sm sm:text-base text-gray-600 font-semibold mb-4">
-                                            <span>{course.duration}</span>
-                                            <span>{course.level}</span>
-                                        </div>
-
-                                        <button className="w-full bg-[#0f3069] hover:bg-[#ff6575] text-white font-bold py-2 px-4 rounded-full transition-colors text-sm sm:text-base">
-                                            Enroll Now
-                                        </button>
-                                    </div>
-                                </motion.div>
-                            ))
-                        ) : (
-                            <motion.p
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                className="text-center col-span-full text-gray-500 text-lg font-semibold"
-                            >
-                                No courses found.
-                            </motion.p>
-                        )}
-                    </AnimatePresence>
+                                    No courses found.
+                                </motion.p>
+                            )}
+                        </AnimatePresence>
+                    </div>
                 </div>
             </div>
+
         </div>
+
     );
 };
 

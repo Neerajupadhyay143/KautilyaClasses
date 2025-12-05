@@ -60,7 +60,7 @@ const ContactPage = () => {
 
     return (
         <div className="flex flex-col bg-gray-50">
-        
+
             {/* ==== HERO SECTION ==== */}
             <section className="w-full bg-[#0f3069] py-28 text-center mt-40">
                 <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">Contact</h1>
@@ -139,13 +139,18 @@ const ContactPage = () => {
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0f3069] focus:border-transparent text-sm sm:text-base outline-none"
                                     >
                                         <option value="">Select a subject</option>
-                                        <option value="product-inquiry">Product Inquiry</option>
-                                        <option value="support">Customer Support</option>
-                                        <option value="installation">Installation Help</option>
-                                        <option value="warranty">Warranty Claim</option>
+                                        <option value="clat">CLAT 2026-27</option>
+                                        <option value="cuet">CUET (UG)</option>
+                                        <option value="mh-cet">MH-CET Law</option>
+                                        <option value="mdu">MDU BA-LLB (5 Years)</option>
+                                        <option value="state-law">State Law Entrance Exams</option>
+                                        <option value="admission">Admission Inquiry</option>
+                                        <option value="demo-class">Demo Class Request</option>
+                                        <option value="fee-structure">Fee Structure Inquiry</option>
                                         <option value="other">Other</option>
                                     </select>
                                 </div>
+
                             </div>
 
                             <div>

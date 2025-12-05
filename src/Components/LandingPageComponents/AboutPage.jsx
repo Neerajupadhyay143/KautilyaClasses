@@ -33,22 +33,10 @@ export default function AboutPage() {
                 initial: { opacity: 0, transform: 'translateY(30px)' },
                 animate: { opacity: 1, transform: 'translateY(0)' }
             },
-            fadeIn: {
-                initial: { opacity: 0 },
-                animate: { opacity: 1 }
-            },
-            slideLeft: {
-                initial: { opacity: 0, transform: 'translateX(-30px)' },
-                animate: { opacity: 1, transform: 'translateX(0)' }
-            },
-            slideRight: {
-                initial: { opacity: 0, transform: 'translateX(30px)' },
-                animate: { opacity: 1, transform: 'translateX(0)' }
-            },
-            scale: {
-                initial: { opacity: 0, transform: 'scale(0.9)' },
-                animate: { opacity: 1, transform: 'scale(1)' }
-            }
+            fadeIn: { initial: { opacity: 0 }, animate: { opacity: 1 } },
+            slideLeft: { initial: { opacity: 0, transform: 'translateX(-30px)' }, animate: { opacity: 1, transform: 'translateX(0)' } },
+            slideRight: { initial: { opacity: 0, transform: 'translateX(30px)' }, animate: { opacity: 1, transform: 'translateX(0)' } },
+            scale: { initial: { opacity: 0, transform: 'scale(0.9)' }, animate: { opacity: 1, transform: 'scale(1)' } }
         };
 
         const style = {
@@ -69,14 +57,13 @@ export default function AboutPage() {
 
             {/* ==== HERO SECTION ==== */}
             <section className="w-full bg-[#0f3069] py-28 text-center mt-40">
-                <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">About</h1>
+                <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">About Us</h1>
                 <p className="text-gray-200">
                     <span className="text-[#ff6575] font-semibold">Home</span> / About
                 </p>
             </section>
 
-
-            {/* ==== FIRST ABOUT SECTION ==== */}
+            {/* ==== WHO WE ARE ==== */}
             <section className="py-20 bg-gray-50">
                 <div className="max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-10 items-center">
 
@@ -84,143 +71,88 @@ export default function AboutPage() {
                     <Motion>
                         <div>
                             <h2 className="text-3xl md:text-4xl font-bold text-[#0f3069] mb-6">
-                                Turning Your Career Dreams into Reality
+                                Who We Are
                             </h2>
-                            <p className="text-gray-600 mb-6 text-lg">
-                                At Kautilya Law Institute, we believe that every student
-                                deserves a fair chance to study at a dream university.
-                                Our CUET coaching program is designed with clarity,
-                                consistency and confidence-building in mind.
+
+                            <p className="text-gray-700 mb-6 text-lg">
+                                Founded in 2015, Kautilya Law Institute has built a strong reputation 
+                                as one of Rohtak’s most trusted centres for law entrance exam preparation.
+                                With over <b>10+ years of legacy</b>, we have guided thousands of aspirants
+                                toward success in Judiciary, Attorney exams, CLAT, and CUET(UG).
                             </p>
 
-                            <div className="space-y-4">
-                                {[
-                                    {
-                                        title: "Comprehensive Coverage:",
-                                        text: "Language, Domain Subjects, and General Test — all under one roof",
-                                    },
-                                    {
-                                        title: "Performance Tracking:",
-                                        text: "Regular reports & personalized feedback",
-                                    },
-                                    {
-                                        title: "Student-Centric Support:",
-                                        text: "Unlimited doubt-solving sessions",
-                                    },
-                                ].map((item, i) => (
-                                    <div key={i} className="flex items-start gap-3">
-                                        <CheckCircle className="h-6 w-6 text-[#ff6575]" />
-                                        <p className="text-gray-700">
-                                            <span className="font-semibold">{item.title}</span> {item.text}
-                                        </p>
-                                    </div>
-                                ))}
-                            </div>
+                            <p className="text-gray-700 text-lg">
+                                Our mission is simple — to provide <b>quality education, personalised guidance,
+                                and exam-focused preparation</b> to every student who walks through our doors.
+                            </p>
                         </div>
                     </Motion>
 
                     {/* Right Image */}
                     <Motion>
-                        <div className="relative">
-                            <img
-                                src="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&h=600&fit=crop"
-                                className="rounded-2xl shadow-2xl"
-                            />
-
-                            <div className="absolute -top-6 -right-6 bg-[#ff6575] p-4 rounded-xl shadow-xl">
-                                <div className="flex gap-1 mb-1">
-                                    {[...Array(5)].map((_, i) => (
-                                        <Star key={i} className="h-4 w-4 text-white fill-white" />
-                                    ))}
-                                </div>
-                                <p className="text-white font-semibold text-sm">
-                                    90% Satisfaction
-                                </p>
-                            </div>
-                        </div>
+                        <img
+                            src="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=800&h=600&fit=crop"
+                            className="rounded-2xl shadow-2xl"
+                        />
                     </Motion>
 
                 </div>
             </section>
 
-
-            {/* ==== IMAGE + FEATURES SECTION ==== */}
+            {/* ==== OUR JOURNEY ==== */}
             <section className="py-20 bg-white">
                 <div className="max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center">
 
                     {/* LEFT IMAGE */}
                     <img
                         src="https://cdn-ileddnh.nitrocdn.com/VvbjSmbBaOfsPQgrBYsFRMPGazgXpDxh/assets/images/optimized/rev-b329085/kautilyavisionclasses.com/wp-content/uploads/2025/05/img_9-1.png"
-                        className="rounded-xl"
+                        className="rounded-xl "
                     />
 
                     {/* RIGHT TEXT */}
                     <div>
                         <span className="text-[#ff6575] font-semibold uppercase tracking-wide">
-                            10 years Glory of success
+                            Our Journey
                         </span>
 
                         <h2 className="text-3xl md:text-4xl font-bold mt-2 mb-6">
-                            Some reasons why Start Your Online Learning with Us
+                            How We Became a Trusted Name in Law Entrance Coaching
                         </h2>
 
-                        <div className="space-y-5">
-                            {[
-                                {
-                                    icon: <Video className="h-10 w-10 text-[#ff6575]" />,
-                                    title: "Expert Faculty & Live Doubt Sessions",
-                                    desc: "Learn from experienced teachers with real-time support.",
-                                },
-                                {
-                                    icon: <BookOpen className="h-10 w-10 text-[#ff6575]" />,
-                                    title: "Recorded Lectures & Study Materials",
-                                    desc: "Revisit lessons anytime with high-quality resources.",
-                                },
-                                {
-                                    icon: <Users className="h-10 w-10 text-[#ff6575]" />,
-                                    title: "Regular Tests & Performance Analysis",
-                                    desc: "Stay exam-ready with weekly mock tests.",
-                                },
-                            ].map((item, i) => (
-                                <div key={i} className="flex gap-4 items-start">
-                                    <div className="text-3xl">{item.icon}</div>
-                                    <div>
-                                        <h4 className="text-xl font-semibold">{item.title}</h4>
-                                        <p className="text-gray-600">{item.desc}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                        <p className="text-gray-700 leading-relaxed mb-6">
+                            What began as a small batch of motivated learners has now grown
+                            into one of the most trusted law coaching institutes in Haryana.
+                            Through consistent results, experienced faculty, and a student-first approach,
+                            we have shaped thousands of careers.
+                        </p>
+
+                        <p className="text-gray-700">
+                            Today, we continue to guide Judiciary, CLAT, CUET(UG) & Law Officer aspirants
+                            with the same dedication and passion.
+                        </p>
                     </div>
 
                 </div>
             </section>
 
-
-            {/* ==== ABOUT US SECTION (GOVT EXAMS) ==== */}
+            {/* ==== OUR FACULTY ==== */}
             <section className="py-20 bg-gray-50">
                 <div className="max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center">
 
-                    {/* LEFT TEXT */}
                     <div>
-                        <span className="text-[#ff6575] font-semibold uppercase">Start Today</span>
-                        <h2 className="text-3xl md:text-4xl font-bold mt-2 mb-6">About Us</h2>
-
-                        <p className="text-gray-700 leading-relaxed mb-6">
-                            At Kautilya Vision Classes, we provide comprehensive preparation
-                            for SSC, Railways, CET, Defence & Delhi Police exams. Whether you
-                            aim for CGL, CPO, Delhi Police, Railway Exams, or AFCAT—our expert
-                            faculty guides you every step.
+                        <h2 className="text-3xl md:text-4xl font-bold mb-6">Our Faculty</h2>
+                        <p className="text-gray-700 mb-6">
+                            At Kautilya Law Institute, our core strength lies in our dedicated team
+                            of highly qualified and experienced mentors. Each faculty member brings:
                         </p>
 
                         <ul className="space-y-3">
                             {[
-                                "Quantitative Aptitude",
-                                "Reasoning Ability",
-                                "General Science",
-                                "General Knowledge",
-                                "English Language",
-                                "Computer Applications",
+                                "Deep subject knowledge",
+                                "Real exam insights",
+                                "Years of teaching experience",
+                                "Focus on concept clarity",
+                                "Exam-oriented problem-solving"
                             ].map((item, i) => (
                                 <li key={i} className="flex items-center gap-3">
                                     <CheckCircle className="h-5 w-5 text-[#0f3069]" />
@@ -228,93 +160,150 @@ export default function AboutPage() {
                                 </li>
                             ))}
                         </ul>
-
-                        <a
-                            href="/contact"
-                            className="mt-6 inline-block bg-[#ff6575] text-white px-6 py-3 rounded-lg shadow hover:bg-[#ff5065] transition"
-                        >
-                            Join Now
-                        </a>
                     </div>
 
-                    {/* RIGHT IMAGE */}
                     <img
-                        src="https://cdn-ileddnh.nitrocdn.com/VvbjSmbBaOfsPQgrBYsFRMPGazgXpDxh/assets/images/optimized/rev-b329085/kautilyavisionclasses.com/wp-content/uploads/2025/05/banner_img-1.png"
-                        className="rounded-xl"
+                        src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+                        className="rounded-xl w-80 mx-auto"
                     />
                 </div>
             </section>
 
-
-            {/* ==== STEPS SECTION ==== */}
+            {/* ==== WHAT WE OFFER ==== */}
             <section className="py-20 bg-white">
                 <div className="max-w-7xl mx-auto px-4">
 
                     <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-                        4 Steps to Start Your Journey with Us
+                        What We Offer
                     </h2>
 
-                    <div className="grid md:grid-cols-2 gap-8">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
 
-                        {/* Steps */}
-                        <div className="space-y-6">
-                            {[
-                                {
-                                    num: "01",
-                                    title: "Connect with Us",
-                                    desc: "Visit our center or contact online.",
-                                },
-                                {
-                                    num: "02",
-                                    title: "Choose Your Course",
-                                    desc: "Select the course that matches your goals.",
-                                },
-                                {
-                                    num: "03",
-                                    title: "Enroll & Get Started",
-                                    desc: "Complete admission and attend orientation.",
-                                },
-                                {
-                                    num: "04",
-                                    title: "Start Your Journey",
-                                    desc: "Begin learning with expert guidance.",
-                                },
-                            ].map((item, i) => (
-                                <div key={i} className="flex items-start gap-4">
-                                    <div className="text-3xl font-bold text-[#ff6575]">{item.num}</div>
-                                    <div>
-                                        <h4 className="text-xl font-semibold">{item.title}</h4>
-                                        <p className="text-gray-600">{item.desc}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Video */}
-                        <div>
-                            <div
-                                className="rounded-xl overflow-hidden shadow-xl 
-        h-56 sm:h-64 md:h-72 lg:h-80 
-        bg-cover bg-center flex items-center justify-center"
-                                style={{
-                                    backgroundImage:
-                                        'url("https://cdn-ileddnh.nitrocdn.com/VvbjSmbBaOfsPQgrBYsFRMPGazgXpDxh/assets/images/optimized/rev-b329085/kautilyavisionclasses.com/wp-content/uploads/2025/08/Kautilya-vision-classes.jpg")',
-                                    backgroundSize: "cover",
-                                }}
-                            >
-                                <a
-                                    href="https://www.youtube.com/watch?v=GUnnEkENCAc"
-                                    target="_blank"
-                                    className="bg-white p-4 rounded-full shadow-lg hover:scale-110 transition"
-                                >
-                                    <Play className="h-8 w-8 text-[#ff6575]" />
-                                </a>
+                        {[
+                            {
+                                title: "Comprehensive Classroom Programs",
+                                desc: "Concept-building sessions with structured lesson plans."
+                            },
+                            {
+                                title: "High-Quality Class Notes",
+                                desc: "Easy-to-understand notes prepared by subject experts."
+                            },
+                            {
+                                title: "Regular Mock Tests (Online + Offline)",
+                                desc: "Simulating real exam patterns with detailed analysis."
+                            },
+                            {
+                                title: "Digital Learning & Animated Content",
+                                desc: "Modern visual tools that simplify tough concepts."
+                            },
+                            {
+                                title: "Targeted Revision Classes",
+                                desc: "Focused sessions to strengthen weak areas."
+                            },
+                            {
+                                title: "Crash Courses",
+                                desc: "High-intensity revision programs for last-minute success."
+                            },
+                            {
+                                title: "24/7 Doubt Support",
+                                desc: "Because every doubt matters."
+                            }
+                        ].map((item, i) => (
+                            <div key={i} className="p-6 bg-gray-50 rounded-xl shadow hover:shadow-lg transition">
+                                <h4 className="text-xl font-semibold mb-2">{item.title}</h4>
+                                <p className="text-gray-600">{item.desc}</p>
                             </div>
-                        </div>
-
+                        ))}
 
                     </div>
+
                 </div>
+            </section>
+
+            {/* ==== TEACHING APPROACH ==== */}
+            <section className="py-20 bg-gray-50">
+                <div className="max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-12 items-center">
+
+                    <div>
+                        <h2 className="text-3xl md:text-4xl font-bold mb-6">Our Teaching Approach</h2>
+
+                        <p className="text-gray-700 mb-6">
+                            We combine traditional classroom excellence with modern digital tools:
+                        </p>
+
+                        <ul className="space-y-3">
+                            {[
+                                "Concept clarity",
+                                "Regular practice",
+                                "Analytical problem-solving",
+                                "Performance tracking",
+                                "Discipline & consistency",
+                                "Individual attention"
+                            ].map((item, i) => (
+                                <li key={i} className="flex items-center gap-3">
+                                    <CheckCircle className="h-5 w-5 text-[#0f3069]" />
+                                    <span className="text-gray-700 font-medium">{item}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <img
+                        src="https://cdn-icons-png.flaticon.com/512/201/201623.png"
+                        className="rounded-xl w-72 mx-auto"
+                    />
+                </div>
+            </section>
+
+            {/* ==== ACHIEVEMENTS ==== */}
+            <section className="py-20 bg-white">
+                <div className="max-w-7xl mx-auto px-4">
+
+                    <h2 className="text-3xl md:text-4xl font-bold text-center mb-10">
+                        Our Achievements
+                    </h2>
+
+                    <p className="text-center text-gray-700 max-w-3xl mx-auto mb-12">
+                        Over the years, our students have cleared:
+                    </p>
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+                        {[
+                            "Judiciary Exams",
+                            "Attorney & Law Officer Exams",
+                            "CLAT Undergraduate",
+                            "CUET(UG) – Law & Humanities",
+                            "Multiple University Entrance Tests"
+                        ].map((item, i) => (
+                            <div key={i} className="p-6 bg-gray-50 rounded-xl shadow hover:shadow-lg transition text-center">
+                                <h4 className="text-xl font-semibold">{item}</h4>
+                            </div>
+                        ))}
+
+                    </div>
+
+                </div>
+            </section>
+
+            {/* ==== FINAL CTA ==== */}
+            <section className="py-20 bg-gray-50 text-center">
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                    Your Journey Starts Here
+                </h2>
+
+                <p className="text-gray-700 max-w-3xl mx-auto mb-8 text-lg">
+                    With structured classes, practice tools, expert mentors, mock tests,
+                    revision notes, and crash courses—Kautilya Law Institute provides
+                    everything you need to prepare for CLAT & CUET(UG).
+                </p>
+
+                <a
+                    href="/contact"
+                    className="bg-[#ff6575] text-white px-8 py-4 rounded-lg shadow hover:bg-[#ff5065] transition text-lg"
+                >
+                    Join Kautilya Law Institute
+                </a>
             </section>
 
         </div>

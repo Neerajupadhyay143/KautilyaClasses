@@ -5,59 +5,60 @@ const AuthPage = () => {
     const [isLogin, setIsLogin] = useState(true);
 
     return (
-        <div className="min-h-screen flex justify-center items-center bg-gray-100 px-4">
+        <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-[#0f3069] to-[#183b7a] px-4 py-6">
+            
+            {/* MAIN CARD */}
             <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-                className="w-full max-w-3xl bg-white shadow-xl rounded-xl overflow-hidden flex flex-col md:flex-row"
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="w-full max-w-4xl bg-white/90 backdrop-blur-lg shadow-2xl rounded-2xl overflow-hidden flex flex-col md:flex-row border border-white/40"
             >
-                {/* LEFT SIDE / SLIDER PANEL */}
-                <motion.div
-                    initial={{ x: 0 }}
-                    animate={{ x: isLogin ? 0 : "-100%" }}
-                    transition={{ duration: 0.5 }}
-                    className="relative w-full md:w-1/2 h-56 md:h-auto flex items-center justify-center bg-[#0f3069] text-white font-bold text-2xl p-6"
-                >
-                    {isLogin ? "Welcome Back!" : "Create Your Account"}
 
-                    {/* OVERLAY TEXT CHANGE ANIMATION */}
-                    <motion.div
-                        key={isLogin ? "login" : "signup"}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
-                        className="absolute bottom-6 text-sm text-gray-200"
-                    >
-                        {isLogin
-                            ? "Sign in to continue your journey"
-                            : "Sign up to get started"}
-                    </motion.div>
-                </motion.div>
-
-                {/* RIGHT SIDE - FORMS */}
+                {/* LEFT: IMAGE / BRAND PANEL */}
                 <motion.div
-                    className="w-full md:w-1/2 p-8"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5 }}
+                    transition={{ delay: 0.2 }}
+                    className="hidden md:flex md:w-1/2 bg-[#0f3069] text-white flex-col justify-center items-center p-10"
                 >
-                    <div className="flex justify-center mb-6">
+                    <h1 className="text-4xl font-extrabold tracking-wide mb-3">
+                        {isLogin ? "Welcome Back" : "Join Us"}
+                    </h1>
+
+                    <p className="text-gray-200 text-center text-lg">
+                        {isLogin
+                            ? "Sign in to access your personalised dashboard."
+                            : "Create your account & start your learning journey!"}
+                    </p>
+
+                    {/* Glow Effect */}
+                    <div className="mt-10 w-full h-1 bg-gradient-to-r from-[#ff6575] to-transparent rounded-full"></div>
+                </motion.div>
+
+                {/* RIGHT: FORM SECTION */}
+                <div className="w-full md:w-1/2 p-8 sm:p-10">
+
+                    {/* SWITCH BUTTONS */}
+                    <div className="flex justify-center gap-6 mb-8">
                         <button
                             onClick={() => setIsLogin(true)}
-                            className={`px-4 py-2 ${isLogin
-                                    ? "border-b-2 border-[#ff6575] text-[#ff6575]"
-                                    : "text-gray-500"
-                                }`}
+                            className={`text-lg font-semibold pb-2 transition ${
+                                isLogin
+                                    ? "text-[#ff6575] border-b-2 border-[#ff6575]"
+                                    : "text-gray-500 hover:text-[#ff6575]"
+                            }`}
                         >
                             Login
                         </button>
+
                         <button
                             onClick={() => setIsLogin(false)}
-                            className={`px-4 py-2 ${!isLogin
-                                    ? "border-b-2 border-[#ff6575] text-[#ff6575]"
-                                    : "text-gray-500"
-                                }`}
+                            className={`text-lg font-semibold pb-2 transition ${
+                                !isLogin
+                                    ? "text-[#ff6575] border-b-2 border-[#ff6575]"
+                                    : "text-gray-500 hover:text-[#ff6575]"
+                            }`}
                         >
                             Sign Up
                         </button>
@@ -69,19 +70,24 @@ const AuthPage = () => {
                             initial={{ opacity: 0, x: 50 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.4 }}
-                            className="space-y-4"
+                            className="space-y-5"
                         >
-                            <input
-                                type="email"
-                                placeholder="Email"
-                                className="w-full border p-3 rounded-md"
-                            />
-                            <input
-                                type="password"
-                                placeholder="Password"
-                                className="w-full border p-3 rounded-md"
-                            />
-                            <button className="w-full bg-[#ff6575] text-white py-3 rounded-md mt-2">
+                            <div>
+                                <input
+                                    type="email"
+                                    placeholder="Email Address"
+                                    className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#ff6575] outline-none shadow-sm"
+                                />
+                            </div>
+                            <div>
+                                <input
+                                    type="password"
+                                    placeholder="Password"
+                                    className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#ff6575] outline-none shadow-sm"
+                                />
+                            </div>
+
+                            <button className="w-full bg-[#ff6575] text-white py-3 rounded-lg text-lg font-semibold shadow-md hover:bg-[#ff465f] transition-all">
                                 Login
                             </button>
                         </motion.form>
@@ -93,34 +99,38 @@ const AuthPage = () => {
                             initial={{ opacity: 0, x: -50 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.4 }}
-                            className="space-y-4"
+                            className="space-y-5"
                         >
                             <input
                                 type="text"
                                 placeholder="Full Name"
-                                className="w-full border p-3 rounded-md"
+                                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#ff6575] outline-none shadow-sm"
                             />
+
                             <input
                                 type="email"
                                 placeholder="Email"
-                                className="w-full border p-3 rounded-md"
+                                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#ff6575] outline-none shadow-sm"
                             />
+
                             <input
                                 type="password"
                                 placeholder="Password"
-                                className="w-full border p-3 rounded-md"
+                                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#ff6575] outline-none shadow-sm"
                             />
+
                             <input
                                 type="password"
                                 placeholder="Confirm Password"
-                                className="w-full border p-3 rounded-md"
+                                className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#ff6575] outline-none shadow-sm"
                             />
-                            <button className="w-full bg-[#ff6575] text-white py-3 rounded-md mt-2">
+
+                            <button className="w-full bg-[#ff6575] text-white py-3 rounded-lg text-lg font-semibold shadow-md hover:bg-[#ff465f] transition-all">
                                 Sign Up
                             </button>
                         </motion.form>
                     )}
-                </motion.div>
+                </div>
             </motion.div>
         </div>
     );

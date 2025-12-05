@@ -93,77 +93,79 @@ const BlogsPage = () => {
                         Prepare for the most popular Indian Government exams with our structured courses.
                     </p>
                 </ section>
-                <div className="flex flex-col lg:flex-row min-h-screen bg-gray-100">
+                <div className="flex flex-col lg:flex-row min-h-screen bg-gray-100 w-full justify-center">
 
-                    {/* LEFT PANEL - FILTERS */}
-                    <div className="w-full lg:w-1/4 bg-white p-6 shadow-md">
-                        <h2 className="text-xl font-bold text-[#0f3069] mb-4">Filters</h2>
+                    <div className=" block lg:flex flex-row md: max-w-7xl px-4 ">
+                        {/* LEFT PANEL - FILTERS */}
+                        <div className="w-full lg:w-1/4 bg-white p-6 shadow-md mt-6 rounded-lg">
+                            <h2 className="text-xl font-bold text-[#0f3069] mb-4">Filters</h2>
 
-                        {/* Search */}
-                        <input
-                            type="text"
-                            placeholder="Search blogs..."
-                            className="w-full p-2 border rounded-md mb-6"
-                            onChange={(e) => setDelaySearch(e.target.value)}
-                        />
+                            {/* Search */}
+                            <input
+                                type="text"
+                                placeholder="Search blogs..."
+                                className="w-full p-2 border rounded-md mb-6"
+                                onChange={(e) => setDelaySearch(e.target.value)}
+                            />
 
-                        {/* Categories */}
-                        <h3 className="font-semibold text-[#ff6575] mb-2">Categories</h3>
-                        <div className="flex flex-col space-y-2 mb-6">
-                            {categories.map((cat) => (
-                                <button
-                                    key={cat}
-                                    onClick={() => { setSelectedCategory(cat); setSelectedTag(null); }}
-                                    className={`p-2 rounded-md text-left ${selectedCategory === cat ? "bg-[#ff6575] text-white" : "bg-gray-100"
-                                        }`}
-                                >
-                                    {cat}
-                                </button>
-                            ))}
+                            {/* Categories */}
+                            <h3 className="font-semibold text-[#ff6575] mb-2">Categories</h3>
+                            <div className="flex flex-col space-y-2 mb-6">
+                                {categories.map((cat) => (
+                                    <button
+                                        key={cat}
+                                        onClick={() => { setSelectedCategory(cat); setSelectedTag(null); }}
+                                        className={`p-2 rounded-md text-left ${selectedCategory === cat ? "bg-[#ff6575] text-white" : "bg-gray-100"
+                                            }`}
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Tags */}
+                            <h3 className="font-semibold text-[#ff6575] mb-2">Tags</h3>
+                            <div className="flex flex-wrap gap-2">
+                                {allTags.map((tag) => (
+                                    <span
+                                        key={tag}
+                                        onClick={() => setSelectedTag(tag)}
+                                        className={`px-3 py-1 rounded-full text-sm cursor-pointer ${selectedTag === tag
+                                            ? "bg-[#ff6575] text-white"
+                                            : "bg-gray-200"
+                                            }`}
+                                    >
+                                        #{tag}
+                                    </span>
+                                ))}
+                            </div>
                         </div>
 
-                        {/* Tags */}
-                        <h3 className="font-semibold text-[#ff6575] mb-2">Tags</h3>
-                        <div className="flex flex-wrap gap-2">
-                            {allTags.map((tag) => (
-                                <span
-                                    key={tag}
-                                    onClick={() => setSelectedTag(tag)}
-                                    className={`px-3 py-1 rounded-full text-sm cursor-pointer ${selectedTag === tag
-                                        ? "bg-[#ff6575] text-white"
-                                        : "bg-gray-200"
-                                        }`}
+                        {/* BLOG LIST */}
+                        <div className="flex-1 py-6 lg:p-6 md:py-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {filteredBlogs.map((blog) => (
+                                <motion.div
+                                    key={blog.id}
+                                    onClick={() => setOpenBlog(blog)}
+                                    initial={{ opacity: 0, y: 40 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="bg-white shadow-lg rounded-lg overflow-hidden cursor-pointer hover:shadow-2xl"
                                 >
-                                    #{tag}
-                                </span>
+                                    <img src={blog.image} className="w-full h-40 object-cover" />
+                                    <div className="p-4">
+                                        <h3 className="text-lg font-bold text-[#0f3069]">{blog.title}</h3>
+                                        <p className="text-gray-600 text-sm mt-2 line-clamp-2">{blog.content}</p>
+                                    </div>
+                                </motion.div>
                             ))}
+
+                            {filteredBlogs.length === 0 && (
+                                <p className="text-center col-span-full text-gray-500">No blogs found...</p>
+                            )}
                         </div>
+
                     </div>
-
-                    {/* BLOG LIST */}
-                    <div className="flex-1 p-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredBlogs.map((blog) => (
-                            <motion.div
-                                key={blog.id}
-                                onClick={() => setOpenBlog(blog)}
-                                initial={{ opacity: 0, y: 40 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.3 }}
-                                className="bg-white shadow-lg rounded-lg overflow-hidden cursor-pointer hover:shadow-2xl"
-                            >
-                                <img src={blog.image} className="w-full h-40 object-cover" />
-                                <div className="p-4">
-                                    <h3 className="text-lg font-bold text-[#0f3069]">{blog.title}</h3>
-                                    <p className="text-gray-600 text-sm mt-2 line-clamp-2">{blog.content}</p>
-                                </div>
-                            </motion.div>
-                        ))}
-
-                        {filteredBlogs.length === 0 && (
-                            <p className="text-center col-span-full text-gray-500">No blogs found...</p>
-                        )}
-                    </div>
-
                     {/* DRAWER */}
                     <AnimatePresence>
                         {openBlog && (

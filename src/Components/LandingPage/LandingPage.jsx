@@ -127,22 +127,26 @@ export default function LandingPage() {
                         <Motion type="fadeUp" delay={0.4}>
                             <div>
                                 <div className="inline-block bg-blue-100 text-blue-800 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold mb-3 sm:mb-4">
-                                    Rohtak's Most Trusted CUET Coaching
+                                    Rohtak’s Most Trusted CLAT & CUET(UG) Coaching
                                 </div>
+
                                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
-                                    Your Gateway to Top <span className="text-blue-600">Central Universities</span>
+                                    Your GATEWAY to <span className="text-blue-600">CLAT 2026-27</span> & CUET(UG) Exams
                                 </h1>
-                                <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-2 sm:mb-4">
-                                    Dreaming of getting into Delhi University, BHU, JNU, or Hyderabad University?
-                                    Your journey starts here — at Kautilya Law Institute, Rohtak’s most trusted name for CUET UG Coaching.
+
+                                <p className="text-base font-semibold sm:text-lg md:text-xl text-gray-600 mb-2 sm:mb-4">
+                                    Live + Offline Classes | Weekly Tests | Performance Analytics | 24/7 Doubt Support
                                 </p>
+
                                 <p className="text-xs sm:text-lg md:text-md text-gray-600 mb-6 sm:mb-8">
-                                    With expert guidance, modern study techniques, and a student-first approach, we help you unlock your potential and secure your seat in India’s best universities.
+                                    Everything you need to crack CLAT & CUET with confidence.
                                 </p>
 
                                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-
-                                    <a href="tel:+919996732928" className="border-2 border-blue-600 text-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-blue-50 transition flex items-center justify-center text-sm sm:text-base">
+                                    <a
+                                        href="tel:+919996732928"
+                                        className="border-2 border-blue-600 text-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-blue-50 transition flex items-center justify-center text-sm sm:text-base"
+                                    >
                                         <Phone className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                                         Call Now
                                     </a>
@@ -153,24 +157,60 @@ export default function LandingPage() {
                         {/* Right Content / Image or Form */}
                         <Motion type="scale" delay={0.4}>
                             <div className="relative mt-8 lg:mt-0">
-
                                 <div className="bg-white p-6 sm:p-8 md:p-10 rounded-2xl shadow-2xl transition-all duration-500">
                                     <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 mb-4 text-center">
                                         Enquire Now
                                     </h2>
+
                                     <form className="flex flex-col gap-3">
-                                        <input type="text" placeholder="Name" className="border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" />
-                                        <input type="email" placeholder="Email" className="border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" />
-                                        <input type="text" placeholder="Contact Number" className="border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" />
-                                        <textarea placeholder="Enter Your Query" className="border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
-                                        <button type="submit" className="border-2 border-blue-500 text-blue-500 px-4 py-2 rounded-md font-semibold hover:bg-blue-50 transition flex items-center justify-center">
-                                            Schedule a Call
+                                        <input
+                                            type="text"
+                                            placeholder="Name"
+                                            className="border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                        />
+
+                                        <input
+                                            type="email"
+                                            placeholder="Email"
+                                            className="border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                        />
+
+                                        <input
+                                            type="text"
+                                            placeholder="Contact Number"
+                                            className="border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                        />
+
+                                        {/* DROPDOWN ADDED */}
+                                        <select
+                                            className="border px-3 py-2 rounded-md text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                        >
+                                            <option value="" disabled selected>
+                                                Select Exam
+                                            </option>
+                                            <option value="clat">CLAT 2026-27</option>
+                                            <option value="cuet">CUET (UG)</option>
+                                            <option value="mh-cet">MH-CET Law</option>
+                                            <option value="mdu">MDU BA-LLB (5 Years)</option>
+                                            <option value="state-law">State Law Entrance Exams</option>
+                                        </select>
+
+                                        <textarea
+                                            placeholder="Enter Your Query"
+                                            className="border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                        ></textarea>
+                                        <button
+                                            type="submit"
+                                            className="border-2 border-blue-500 text-blue-500 px-4 py-2 rounded-md font-semibold hover:bg-blue-50 transition flex items-center justify-center"
+                                        >
+                                            Send Message
                                         </button>
+
                                     </form>
                                 </div>
-
                             </div>
                         </Motion>
+
 
                     </div>
                 </div>
@@ -186,15 +226,17 @@ export default function LandingPage() {
                             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
                                 Why We Stand Out?
                             </h2>
+
                             <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mb-4">
                                 Our consistent results speak louder than words.
-                                Kautilya Law Institute has become Rohtak’s leading CUET coaching brand through its commitment to excellence and personalized learning.
+                                Kautilya Law Institute has become India’s leading CLAT & CUET coaching brand through its commitment to excellence and personalized learning.
                             </p>
+
                             <p className="text-base sm:text-lg md:text-sm text-gray-600 max-w-3xl font-semibold">
-                                Kautilya Law Institute – Rohtak’s Most Trusted CUET Coaching<br />
-                                When you join Kautilya, you don’t just prepare for CUET — you prepare for life.<br />
+                                Kautilya Law Institute – Student’s Most Trusted CLAT & CUET Coaching<br />
+                                When you join Kautilya, you don’t just prepare for CLAT or CUET Exam — you prepare for life.<br />
                                 Our classroom and online programs combine conceptual clarity, practical mock tests, and motivational mentorship to ensure success.<br />
-                                Students from Haryana, Delhi NCR, and nearby regions choose us because we deliver results with responsibility.
+                                Students from Delhi NCR, Haryana, Punjab, Rajasthan and nearby regions choose us because we deliver results with responsibility.
                             </p>
                         </div>
 
@@ -209,6 +251,7 @@ export default function LandingPage() {
 
                     </div>
                 </Motion>
+
 
                 {/* Stats Section */}
                 <section className="py-10 sm:py-12 md:py-16 bg-blue-900 ">
