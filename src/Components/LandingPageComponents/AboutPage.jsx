@@ -106,7 +106,7 @@ export default function AboutPage() {
                     {/* LEFT IMAGE */}
                     <img
                         src="https://cdn-ileddnh.nitrocdn.com/VvbjSmbBaOfsPQgrBYsFRMPGazgXpDxh/assets/images/optimized/rev-b329085/kautilyavisionclasses.com/wp-content/uploads/2025/05/img_9-1.png"
-                        className="rounded-xl "
+                        className="rounded-xl"
                     />
 
                     {/* RIGHT TEXT */}

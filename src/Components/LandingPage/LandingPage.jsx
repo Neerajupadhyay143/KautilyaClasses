@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Menu, X, Phone, MapPin, Mail, ChevronRight, Award, Users, BookOpen, TrendingUp, CheckCircle, Star, Clock, Video, FileText, BarChart, Check, PhoneCall, Monitor, MessageCircle, ClipboardList, BarChart2, MessageSquare, CreditCard, Laptop, UserCheck, } from 'lucide-react';
 import logo from "../../assets/images/LandingPage/LOGO/Kautilya.png"
 import Navbar from './Navbar';
-
+import design from "../../assets/images/designs/design.webp"
 // Motion component for animations
 const Motion = ({ children, className, delay = 0, duration = 0.5, type = 'fadeUp' }) => {
     const [isVisible, setIsVisible] = useState(false);
@@ -119,7 +119,19 @@ export default function LandingPage() {
             <Navbar />
 
             {/* Hero Section */}
-            <section className="pt-24 sm:pt-28 md:pt-32 pb-12 sm:pb-16 md:pb-20 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+            <section
+                className="relative pt-24 pb-20 bg-[#113471] overflow-hidden mt-28"
+                style={{
+                    backgroundImage: `url(${design})`,
+                    backgroundSize: "contain",
+                   
+                   
+                }}
+            >
+                <div className="absolute inset-0 bg-[#113471]/60 backdrop-blur-[1px]"></div>
+
+
+
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
 
@@ -130,22 +142,22 @@ export default function LandingPage() {
                                     Rohtak’s Most Trusted CLAT & CUET(UG) Coaching
                                 </div>
 
-                                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
-                                    Your GATEWAY to <span className="text-blue-600">CLAT 2026-27</span> & CUET(UG) Exams
+                                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight">
+                                    Your GATEWAY to <span className="text-[#ff6575]">CLAT 2026-27</span> & CUET(UG) Exams
                                 </h1>
 
-                                <p className="text-base font-semibold sm:text-lg md:text-xl text-gray-600 mb-2 sm:mb-4">
+                                <p className="text-base font-semibold sm:text-lg md:text-xl text-gray-300 mb-2 sm:mb-4">
                                     Live + Offline Classes | Weekly Tests | Performance Analytics | 24/7 Doubt Support
                                 </p>
 
-                                <p className="text-xs sm:text-lg md:text-md text-gray-600 mb-6 sm:mb-8">
+                                <p className="text-xs sm:text-lg md:text-md text-gray-300 mb-6 sm:mb-8">
                                     Everything you need to crack CLAT & CUET with confidence.
                                 </p>
 
                                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                                     <a
                                         href="tel:+919996732928"
-                                        className="border-2 border-blue-600 text-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-blue-50 transition flex items-center justify-center text-sm sm:text-base"
+                                        className="border-2 border-[#ff6575] text-[#ff6575] px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-[#ff6575] hover:text-white transition flex items-center justify-center text-sm sm:text-base"
                                     >
                                         <Phone className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                                         Call Now
