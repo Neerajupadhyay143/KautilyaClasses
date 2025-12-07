@@ -7,24 +7,62 @@ import Courses from "./Components/LandingPageComponents/Courses";
 import Blogs from "./Components/LandingPageComponents/Blogs";
 import AuthPage from "./Components/Auth/UserAuthPage";
 
+import AdminLogin from "./admin/AdminLogin";
+import Dashboard from "./admin/Dashboard";
+import ManageCourses from "./admin/ManageCourses";
+import ManageBlogs from "./admin/ManageBlogs";
+import AdminLayout from "./admin/AdminLayout";
 
+import AdminProtected from "./admin/AdminProtected";
+
+import { SnackbarProvider } from "notistack";
+import { useAuth } from "./context/AuthContext";
+import CenterLoader from "./Components/Loader/CenterLoader";
 
 function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
+  const { loading } = useAuth();   // 🔥 yaha useAuth safe hai kyuki SnackbarProvider wrapper ke andar hoga
 
-        {/* Main Layout */}
-        <Route path="/" element={<Layout />}>
-          <Route index element={<LandingPage />} />
-          <Route path="about" element={<AboutPage />} />
-          <Route path="contact" element={<ContactPage />} />
-          <Route path="courses" element={<Courses />} />
-          <Route path="Blogs" element={<Blogs />} />
-          <Route path="auth" element={<AuthPage />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+  return (
+    <>
+      {loading && <CenterLoader />}
+      {/* Loader globally work karega */}
+
+      <BrowserRouter>
+        <Routes>
+
+          {/* USER WEBSITE ROUTES */}
+          <Route path="/" element={<Layout />}>
+            <Route index element={<LandingPage />} />
+            <Route path="about" element={<AboutPage />} />
+            <Route path="contact" element={<ContactPage />} />
+            <Route path="courses" element={<Courses />} />
+            <Route path="blogs" element={<Blogs />} />
+            <Route path="auth" element={<AuthPage />} />
+          </Route>
+
+          {/* ADMIN LOGIN */}
+          <Route path="/admin" element={<AdminLogin />} />
+
+          {/* PROTECTED ADMIN PANEL */}
+          <Route
+            path="/admin-panel"
+            element={
+              <AdminProtected>
+                <AdminLayout />
+              </AdminProtected>
+            }
+          >
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="courses" element={<ManageCourses />} />
+            <Route path="blogs" element={<ManageBlogs />} />
+          </Route>
+
+        </Routes>
+      </BrowserRouter>
+
+
+    </>
+
   );
 }
 

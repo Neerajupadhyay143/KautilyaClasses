@@ -70,7 +70,7 @@ export default function LandingPage() {
     const [scrolled, setScrolled] = useState(false);
     useEffect(() => {
         const handleScroll = () => {
-            setScrolled(window.scrollY > 50);
+            setScrolled(window.scrollY > 80);
         };
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
@@ -120,7 +120,7 @@ export default function LandingPage() {
 
             {/* Hero Section */}
             <section
-                className="relative pt-24 pb-20 bg-[#113471] overflow-hidden mt-28"
+                className="relative pt-24 pb-20 bg-[#113471] overflow-hidden mt-24 lg:mt-28 md:mt-28"
                 style={{
                     backgroundImage: `url(${design})`,
                     backgroundSize: "contain",
