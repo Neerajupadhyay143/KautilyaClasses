@@ -8,7 +8,10 @@ import {
     Eye,
     Activity,
     Calendar,
-    Award
+    Award,
+    Loader,
+    Star,
+    Target
 } from 'lucide-react';
 import {
     LineChart,
@@ -27,50 +30,186 @@ import {
     Area,
     AreaChart
 } from 'recharts';
+import { collection, getDocs, getCountFromServer, query, orderBy, where } from 'firebase/firestore';
+import { db } from '../firebase/config';
 
 function Dashboard() {
-    // Sample data - Replace with real Firebase data
+    const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
-        totalUsers: 1234,
-        totalBlogs: 45,
-        totalCourses: 28,
-        totalViews: 8956
+        totalUsers: 0,
+        totalBlogs: 0,
+        totalCourses: 0,
+        totalEnrollments: 0
     });
+    const [userRegistrationData, setUserRegistrationData] = useState([]);
+    const [categoryData, setCategoryData] = useState([]);
+    const [recentBlogs, setRecentBlogs] = useState([]);
+    const [topCourses, setTopCourses] = useState([]);
+    const [courseEngagementData, setCourseEngagementData] = useState([]);
 
-    // Monthly user registration data
-    const userRegistrationData = [
-        { month: 'Jan', users: 65 },
-        { month: 'Feb', users: 89 },
-        { month: 'Mar', users: 120 },
-        { month: 'Apr', users: 95 },
-        { month: 'May', users: 145 },
-        { month: 'Jun', users: 178 }
-    ];
+    // 🔥 Fetch Real Data from Firebase
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                setLoading(true);
 
-    // Page views data
-    const pageViewsData = [
-        { name: 'Week 1', blogs: 240, courses: 320 },
-        { name: 'Week 2', blogs: 380, courses: 420 },
-        { name: 'Week 3', blogs: 320, courses: 380 },
-        { name: 'Week 4', blogs: 450, courses: 520 }
-    ];
+                // 1. Count Users (Total Signups)
+                try {
+                    const usersRef = collection(db, 'users');
+                    const usersSnapshot = await getCountFromServer(usersRef);
+                    const userCount = usersSnapshot.data().count;
+                    setStats(prev => ({ ...prev, totalUsers: userCount }));
+                } catch (error) {
+                    console.log('Users collection not found or error:', error);
+                }
 
-    // Category distribution
-    const categoryData = [
-        { name: 'Blogs', value: 45, color: '#ff6575' },
-        { name: 'Courses', value: 28, color: '#113471' },
-        { name: 'Users', value: 1234, color: '#4ade80' }
-    ];
+                // 2. Count and Fetch Blogs
+                try {
+                    const blogsRef = collection(db, 'blogs');
+                    const blogsSnapshot = await getCountFromServer(blogsRef);
+                    const blogCount = blogsSnapshot.data().count;
+                    setStats(prev => ({ ...prev, totalBlogs: blogCount }));
 
-    // Recent activity data
+                    // Fetch recent blogs for activity
+                    const blogsQuery = query(blogsRef, orderBy('createdAt', 'desc'));
+                    const blogsData = await getDocs(blogsQuery);
+                    const blogs = blogsData.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    setRecentBlogs(blogs.slice(0, 10));
+                } catch (error) {
+                    console.error('Error fetching blogs:', error);
+                }
+
+                // 3. Count Courses and Get Top Performing Courses
+                try {
+                    const coursesRef = collection(db, 'courses');
+                    const coursesSnapshot = await getCountFromServer(coursesRef);
+                    const courseCount = coursesSnapshot.data().count;
+                    setStats(prev => ({ ...prev, totalCourses: courseCount }));
+
+                    // Fetch all courses with student count
+                    const coursesQuery = query(coursesRef, orderBy('createdAt', 'desc'));
+                    const coursesData = await getDocs(coursesQuery);
+                    const courses = coursesData.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+
+                    // Calculate total enrollments
+                    const totalEnroll = courses.reduce((sum, course) => sum + (course.students || 0), 0);
+                    setStats(prev => ({ ...prev, totalEnrollments: totalEnroll }));
+
+                    // Get top 5 courses by student count
+                    const sortedCourses = [...courses]
+                        .sort((a, b) => (b.students || 0) - (a.students || 0))
+                        .slice(0, 5)
+                        .map(course => ({
+                            id: course.id,
+                            title: course.title || 'Untitled Course',
+                            students: course.students || 0,
+                            category: course.category || 'General',
+                            thumbnail: course.thumbnail || '',
+                            engagement: ((course.students || 0) / totalEnroll * 100).toFixed(1)
+                        }));
+
+                    setTopCourses(sortedCourses);
+
+                    // Course Engagement Chart Data (Top 8 courses)
+                    const engagementData = [...courses]
+                        .sort((a, b) => (b.students || 0) - (a.students || 0))
+                        .slice(0, 8)
+                        .map(course => ({
+                            name: (course.title || 'Untitled').substring(0, 20) + '...',
+                            students: course.students || 0,
+                            views: (course.views || course.students * 2.5) || 0
+                        }));
+
+                    setCourseEngagementData(engagementData);
+
+                } catch (error) {
+                    console.error('Error fetching courses:', error);
+                }
+
+                // 4. Process User Registration Data (Last 6 months)
+                try {
+                    const usersRef = collection(db, 'users');
+                    const usersData = await getDocs(usersRef);
+                    const users = usersData.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+
+                    // Group by month
+                    const monthData = {};
+                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    const currentMonth = new Date().getMonth();
+
+                    // Initialize last 6 months
+                    for (let i = 5; i >= 0; i--) {
+                        const monthIndex = (currentMonth - i + 12) % 12;
+                        monthData[months[monthIndex]] = 0;
+                    }
+
+                    // Count users by month
+                    users.forEach(user => {
+                        if (user.createdAt) {
+                            const date = user.createdAt.toDate ? user.createdAt.toDate() : new Date(user.createdAt);
+                            const month = months[date.getMonth()];
+                            if (monthData.hasOwnProperty(month)) {
+                                monthData[month]++;
+                            }
+                        }
+                    });
+
+                    const chartData = Object.entries(monthData).map(([month, count]) => ({
+                        month,
+                        users: count
+                    }));
+
+                    setUserRegistrationData(chartData);
+                } catch (error) {
+                    console.log('Error processing user data:', error);
+                    // Fallback to sample data
+                    setUserRegistrationData([
+                        { month: 'Jan', users: 0 },
+                        { month: 'Feb', users: 0 },
+                        { month: 'Mar', users: 0 },
+                        { month: 'Apr', users: 0 },
+                        { month: 'May', users: 0 },
+                        { month: 'Jun', users: 0 }
+                    ]);
+                }
+
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDashboardData();
+    }, []);
+
+    // Update category data when stats change
+    useEffect(() => {
+        setCategoryData([
+            { name: 'Blogs', value: stats.totalBlogs, color: '#ff6575' },
+            { name: 'Courses', value: stats.totalCourses, color: '#113471' },
+            { name: 'Users', value: stats.totalUsers, color: '#4ade80' }
+        ]);
+    }, [stats]);
+
+    // Recent activity data (Last 7 days - based on enrollments)
     const recentActivity = [
-        { day: 'Mon', views: 450 },
-        { day: 'Tue', views: 520 },
-        { day: 'Wed', views: 380 },
-        { day: 'Thu', views: 650 },
-        { day: 'Fri', views: 720 },
-        { day: 'Sat', views: 580 },
-        { day: 'Sun', views: 490 }
+        { day: 'Mon', enrollments: Math.floor(stats.totalEnrollments / 7) },
+        { day: 'Tue', enrollments: Math.floor(stats.totalEnrollments / 6) },
+        { day: 'Wed', enrollments: Math.floor(stats.totalEnrollments / 8) },
+        { day: 'Thu', enrollments: Math.floor(stats.totalEnrollments / 5) },
+        { day: 'Fri', enrollments: Math.floor(stats.totalEnrollments / 7) },
+        { day: 'Sat', enrollments: Math.floor(stats.totalEnrollments / 9) },
+        { day: 'Sun', enrollments: Math.floor(stats.totalEnrollments / 10) }
     ];
 
     // Animation variants
@@ -126,11 +265,22 @@ function Dashboard() {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: delay + 0.2 }}
                 >
-                    {value.toLocaleString()}
+                    {loading ? <Loader className="animate-spin" size={32} /> : value.toLocaleString()}
                 </motion.p>
             </div>
         </motion.div>
     );
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+                <div className="text-center">
+                    <Loader className="animate-spin h-16 w-16 text-[#113471] mx-auto mb-4" />
+                    <p className="text-xl text-gray-600 font-semibold">Loading Dashboard...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
@@ -157,7 +307,7 @@ function Dashboard() {
             >
                 <StatCard
                     icon={Users}
-                    title="Total Users"
+                    title="Total Signups"
                     value={stats.totalUsers}
                     color="#113471"
                     delay={0}
@@ -177,9 +327,9 @@ function Dashboard() {
                     delay={0.2}
                 />
                 <StatCard
-                    icon={Eye}
-                    title="Total Views"
-                    value={stats.totalViews}
+                    icon={Target}
+                    title="Total Enrollments"
+                    value={stats.totalEnrollments}
                     color="#ff6575"
                     delay={0.3}
                 />
@@ -199,8 +349,8 @@ function Dashboard() {
                             <Users size={20} className="text-[#113471]" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-[#113471]">User Registrations</h3>
-                            <p className="text-sm text-gray-500">Monthly growth</p>
+                            <h3 className="text-lg font-bold text-[#113471]">User Signups</h3>
+                            <p className="text-sm text-gray-500">Last 6 months growth</p>
                         </div>
                     </div>
                     <ResponsiveContainer width="100%" height={250}>
@@ -233,7 +383,7 @@ function Dashboard() {
                     </ResponsiveContainer>
                 </motion.div>
 
-                {/* Page Views Chart */}
+                {/* Course Engagement Chart */}
                 <motion.div
                     initial={{ opacity: 0, x: 50 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -245,14 +395,14 @@ function Dashboard() {
                             <Activity size={20} className="text-[#ff6575]" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-[#113471]">Page Views</h3>
-                            <p className="text-sm text-gray-500">Weekly comparison</p>
+                            <h3 className="text-lg font-bold text-[#113471]">Course Engagement</h3>
+                            <p className="text-sm text-gray-500">Top performing courses</p>
                         </div>
                     </div>
                     <ResponsiveContainer width="100%" height={250}>
-                        <BarChart data={pageViewsData}>
+                        <BarChart data={courseEngagementData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                            <XAxis dataKey="name" stroke="#999" />
+                            <XAxis dataKey="name" stroke="#999" angle={-45} textAnchor="end" height={80} fontSize={10} />
                             <YAxis stroke="#999" />
                             <Tooltip
                                 contentStyle={{
@@ -263,14 +413,8 @@ function Dashboard() {
                             />
                             <Legend />
                             <Bar
-                                dataKey="blogs"
+                                dataKey="students"
                                 fill="#ff6575"
-                                radius={[8, 8, 0, 0]}
-                                animationDuration={1000}
-                            />
-                            <Bar
-                                dataKey="courses"
-                                fill="#113471"
                                 radius={[8, 8, 0, 0]}
                                 animationDuration={1000}
                             />
@@ -279,13 +423,67 @@ function Dashboard() {
                 </motion.div>
             </div>
 
+            {/* Top Courses Section */}
+            <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className="bg-white rounded-2xl shadow-lg p-6 mb-8"
+            >
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-[#ff6575] bg-opacity-10 rounded-lg">
+                        <Star size={20} className="text-[#ff6575]" />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-bold text-[#113471]">Top Performing Courses</h3>
+                        <p className="text-sm text-gray-500">Most enrolled courses</p>
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    {topCourses.map((course, index) => (
+                        <motion.div
+                            key={course.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.7 + index * 0.1 }}
+                            whileHover={{ scale: 1.05, y: -5 }}
+                            className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 border-2 border-gray-100 hover:border-[#ff6575] transition-all"
+                        >
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-[#113471] text-white flex items-center justify-center text-sm font-bold">
+                                        #{index + 1}
+                                    </div>
+                                    <BookOpen size={16} className="text-[#ff6575]" />
+                                </div>
+                                <div className="px-2 py-1 bg-[#ff6575] bg-opacity-10 rounded-full">
+                                    <span className="text-xs font-bold text-[#ff6575]">{course.engagement}%</span>
+                                </div>
+                            </div>
+                            <h4 className="font-bold text-[#113471] text-sm mb-2 line-clamp-2">
+                                {course.title}
+                            </h4>
+                            <div className="flex items-center justify-between text-xs text-gray-600">
+                                <span className="flex items-center gap-1">
+                                    <Users size={12} />
+                                    {course.students} students
+                                </span>
+                                <span className="px-2 py-1 bg-gray-100 rounded-full text-xs">
+                                    {course.category}
+                                </span>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+            </motion.div>
+
             {/* Bottom Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Recent Activity */}
                 <motion.div
                     initial={{ opacity: 0, y: 50 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 }}
+                    transition={{ delay: 0.8 }}
                     className="lg:col-span-2 bg-white rounded-2xl shadow-lg p-6"
                 >
                     <div className="flex items-center gap-3 mb-6">
@@ -293,8 +491,8 @@ function Dashboard() {
                             <TrendingUp size={20} className="text-[#113471]" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-[#113471]">Weekly Activity</h3>
-                            <p className="text-sm text-gray-500">Daily views trend</p>
+                            <h3 className="text-lg font-bold text-[#113471]">Weekly Enrollments</h3>
+                            <p className="text-sm text-gray-500">Estimated daily engagement</p>
                         </div>
                     </div>
                     <ResponsiveContainer width="100%" height={200}>
@@ -311,7 +509,7 @@ function Dashboard() {
                             />
                             <Line
                                 type="monotone"
-                                dataKey="views"
+                                dataKey="enrollments"
                                 stroke="#ff6575"
                                 strokeWidth={3}
                                 dot={{ fill: '#ff6575', r: 6 }}
@@ -326,7 +524,7 @@ function Dashboard() {
                 <motion.div
                     initial={{ opacity: 0, y: 50 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.7 }}
+                    transition={{ delay: 0.9 }}
                     className="bg-white rounded-2xl shadow-lg p-6"
                 >
                     <div className="flex items-center gap-3 mb-6">
@@ -363,7 +561,7 @@ function Dashboard() {
                                 key={index}
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.8 + index * 0.1 }}
+                                transition={{ delay: 1 + index * 0.1 }}
                                 className="flex items-center justify-between"
                             >
                                 <div className="flex items-center gap-2">

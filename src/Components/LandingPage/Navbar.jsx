@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Menu, X, UserRound, LogOut } from "lucide-react";
+import { Menu, X, UserRound, LogOut, User, Settings } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import LOGO from "../../assets/images/LandingPage/LOGO/Kautilya.png";
 import AuthPage from "../Auth/UserAuthPage";
@@ -19,12 +19,12 @@ export default function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [openLogin, setOpenLogin] = useState(false);
-    const [openMenu, setOpenMenu] = useState(false);
+    const [openAvatarMenu, setOpenAvatarMenu] = useState(false);
 
-    const { enqueueSnackbar } = useSnackbar();  // ⬅ MUI SNACKBAR
+    const { enqueueSnackbar } = useSnackbar();
     const { user, logout, loading } = useAuth();
 
-    const menuRef = useRef();
+    const avatarMenuRef = useRef();
     const avatarRef = useRef();
 
     const navItems = [
@@ -39,15 +39,16 @@ export default function Navbar() {
     useEffect(() => {
         const closeMenu = (e) => {
             if (
-                menuRef.current &&
-                !menuRef.current.contains(e.target) &&
+                avatarMenuRef.current &&
+                !avatarMenuRef.current.contains(e.target) &&
+                avatarRef.current &&
                 !avatarRef.current.contains(e.target)
             ) {
-                setOpenMenu(false);
+                setOpenAvatarMenu(false);
             }
         };
-        document.addEventListener("click", closeMenu);
-        return () => document.removeEventListener("click", closeMenu);
+        document.addEventListener("mousedown", closeMenu);
+        return () => document.removeEventListener("mousedown", closeMenu);
     }, []);
 
     /* --- Scroll effect --- */
@@ -60,9 +61,9 @@ export default function Navbar() {
     /* --- Logout Handler with Snackbar --- */
     const handleLogout = async () => {
         await logout();
-        enqueueSnackbar("Logged out successfully!", { variant: "success" }); // SNACKBAR
+        setOpenAvatarMenu(false);
+        enqueueSnackbar("Logged out successfully!", { variant: "success" });
     };
-
 
     return (
         <>
@@ -93,48 +94,78 @@ export default function Navbar() {
                                     to={path}
                                     className={({ isActive }) =>
                                         `text-lg transition ${scrolled ? "text-white" : "text-gray-700"
-                                        } hover:text-[#ff6575] ${isActive ? "font-bold text-[#ff6575]" : ""}`
+                                        } hover:text-[#ff6575] ${isActive ? "font-bold text-[#ff6575]" : ""
+                                        }`
                                     }
                                 >
                                     {name}
                                 </NavLink>
                             ))}
 
+                            {/* Login Button (if not logged in) */}
                             {!user && (
                                 <button
                                     onClick={() => setOpenLogin(true)}
-                                    className="flex items-center gap-2 px-4 py-2 bg-[#ff6575] text-white rounded-full"
+                                    className="flex items-center gap-2 px-5 py-2.5 bg-[#ff6575] text-white rounded-full hover:bg-[#ff4560] transition-all shadow-lg hover:shadow-xl"
                                 >
                                     <UserRound size={18} /> Login
                                 </button>
                             )}
 
-                            {/* USER AVATAR */}
+                            {/* USER AVATAR DROPDOWN (Desktop) */}
                             {user && (
                                 <div className="relative">
                                     <div
                                         ref={avatarRef}
-                                        onClick={() => setOpenMenu(!openMenu)}
-                                        className="h-12 w-12 bg-[#113471] text-white rounded-full flex items-center justify-center cursor-pointer text-lg font-bold border-2 border-white"
+                                        onClick={() => setOpenAvatarMenu(!openAvatarMenu)}
+                                        className="h-11 w-11 bg-gradient-to-br from-[#113471] to-[#1a4d8f] text-white rounded-full flex items-center justify-center cursor-pointer text-base font-bold border-2 border-white shadow-lg hover:shadow-xl transition-all hover:scale-105"
                                     >
                                         {getInitials(user.displayName)}
                                     </div>
 
-                                    {openMenu && (
+                                    {/* Dropdown Menu */}
+                                    {openAvatarMenu && (
                                         <div
-                                            ref={menuRef}
-                                            className="absolute right-0 mt-3 w-48 bg-white shadow-xl rounded-xl py-2"
+                                            ref={avatarMenuRef}
+                                            className="absolute right-0 mt-3 w-56 bg-white shadow-2xl rounded-2xl py-2 border border-gray-100 animate-slideDown"
                                         >
-                                            <p className="px-4 py-2 text-gray-700 text-sm">
-                                                {user.displayName}
-                                            </p>
+                                            {/* User Info */}
+                                            <div className="px-4 py-3 border-b border-gray-100">
+                                                <p className="text-sm font-semibold text-gray-800">
+                                                    {user.displayName || "User"}
+                                                </p>
+                                                <p className="text-xs text-gray-500 mt-1">
+                                                    {user.email}
+                                                </p>
+                                            </div>
 
-                                            <button
-                                                onClick={handleLogout}
-                                                className="w-full flex items-center gap-2 px-4 py-3 hover:bg-gray-100 text-red-600 font-medium"
-                                            >
-                                                <LogOut size={18} /> Logout
-                                            </button>
+                                            {/* Menu Items */}
+                                            <div className="py-1">
+                                                <button
+                                                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors"
+                                                >
+                                                    <User size={18} className="text-[#113471]" />
+                                                    <span className="text-sm font-medium">My Profile</span>
+                                                </button>
+
+                                                <button
+                                                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors"
+                                                >
+                                                    <Settings size={18} className="text-[#113471]" />
+                                                    <span className="text-sm font-medium">Settings</span>
+                                                </button>
+                                            </div>
+
+                                            {/* Logout Button */}
+                                            <div className="border-t border-gray-100 pt-1">
+                                                <button
+                                                    onClick={handleLogout}
+                                                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-red-600 font-medium transition-colors rounded-b-2xl"
+                                                >
+                                                    <LogOut size={18} />
+                                                    <span className="text-sm">Logout</span>
+                                                </button>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
@@ -145,9 +176,8 @@ export default function Navbar() {
                         <div className="lg:hidden">
                             {user ? (
                                 <div
-                                    ref={avatarRef}
                                     onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                    className="h-10 w-10 bg-[#113471] text-white rounded-full flex items-center justify-center font-semibold cursor-pointer"
+                                    className="h-10 w-10 bg-gradient-to-br from-[#113471] to-[#1a4d8f] text-white rounded-full flex items-center justify-center font-semibold cursor-pointer border-2 border-white shadow-lg"
                                 >
                                     {getInitials(user.displayName)}
                                 </div>
@@ -166,13 +196,13 @@ export default function Navbar() {
 
                 {/* MOBILE MENU */}
                 {isMenuOpen && (
-                    <div className="lg:hidden bg-white shadow-md p-4 space-y-4">
+                    <div className="lg:hidden bg-white shadow-md p-4 space-y-4 rounded-b-2xl">
                         {navItems.map(({ name, path }) => (
                             <NavLink
                                 key={path}
                                 to={path}
                                 onClick={() => setIsMenuOpen(false)}
-                                className="block text-gray-700 text-lg border-b pb-2"
+                                className="block text-gray-700 text-lg border-b pb-2 hover:text-[#ff6575] transition-colors"
                             >
                                 {name}
                             </NavLink>
@@ -184,17 +214,33 @@ export default function Navbar() {
                                     setOpenLogin(true);
                                     setIsMenuOpen(false);
                                 }}
-                                className="w-full bg-[#ff6575] text-white py-3 rounded-xl"
+                                className="w-full bg-[#ff6575] text-white py-3 rounded-xl font-medium hover:bg-[#ff4560] transition-all"
                             >
                                 Login
                             </button>
                         ) : (
-                            <button
-                                onClick={handleLogout}
-                                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-red-500 text-red-600"
-                            >
-                                <LogOut size={20} /> Logout
-                            </button>
+                            <>
+                                {/* User Info in Mobile */}
+                                <div className="border-t pt-3">
+                                    <p className="text-sm font-semibold text-gray-800 mb-1">
+                                        {user.displayName || "User"}
+                                    </p>
+                                    <p className="text-xs text-gray-500 mb-3">
+                                        {user.email}
+                                    </p>
+                                </div>
+
+                                {/* Logout Button Mobile */}
+                                <button
+                                    onClick={() => {
+                                        handleLogout();
+                                        setIsMenuOpen(false);
+                                    }}
+                                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-red-500 text-red-600 font-medium hover:bg-red-50 transition-all"
+                                >
+                                    <LogOut size={20} /> Logout
+                                </button>
+                            </>
                         )}
                     </div>
                 )}
@@ -202,11 +248,11 @@ export default function Navbar() {
 
             {/* LOGIN POPUP */}
             {openLogin && (
-                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[999]">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-[999]">
                     <div className="relative w-full max-w-3xl mx-4">
                         <button
                             onClick={() => setOpenLogin(false)}
-                            className="absolute top-4 right-4 bg-[#ff6575] p-2 rounded-full text-white"
+                            className="absolute -top-4 -right-4 bg-[#ff6575] p-2 rounded-full text-white shadow-lg hover:bg-[#ff4560] transition-all z-10 hover:scale-110"
                         >
                             <X size={20} />
                         </button>
@@ -215,6 +261,22 @@ export default function Navbar() {
                     </div>
                 </div>
             )}
+
+            <style jsx>{`
+                @keyframes slideDown {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                .animate-slideDown {
+                    animation: slideDown 0.2s ease-out;
+                }
+            `}</style>
         </>
     );
 }

@@ -1,13 +1,14 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { auth } from "../firebase/config";
-import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "../firebase/config.js"
+import { doc, setDoc, getDocs, collection } from "firebase/firestore";
 import {
     onAuthStateChanged,
     signOut,
     signInWithPopup,
     GoogleAuthProvider,
     createUserWithEmailAndPassword,
-    signInWithEmailAndPassword
+    signInWithEmailAndPassword,
+    updateProfile
 } from "firebase/auth";
 
 const AuthContext = createContext();
@@ -15,7 +16,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
 
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(false);  // 🔥 refresh par false
+    const [loading, setLoading] = useState(false);
 
     const googleProvider = new GoogleAuthProvider();
 
@@ -47,11 +48,41 @@ export const AuthProvider = ({ children }) => {
         return firstLetter + lastLetter;
     }
 
-
     // 🔹 GOOGLE LOGIN
     const loginWithGoogle = async () => {
         try {
-            await signInWithPopup(auth, googleProvider);
+            const result = await signInWithPopup(auth, googleProvider);
+            const user = result.user;
+
+            // 🔥 Check if user exists in Firestore, if not create
+            const userDocRef = doc(db, 'users', user.uid);
+            const userDocSnap = await getDocs(collection(db, 'users'));
+
+            // Check if user document exists
+            let userExists = false;
+            userDocSnap.forEach((doc) => {
+                if (doc.id === user.uid) {
+                    userExists = true;
+                }
+            });
+
+            // If user doesn't exist, create new document
+            if (!userExists) {
+                try {
+                    await setDoc(userDocRef, {
+                        uid: user.uid,
+                        fullName: user.displayName || 'Google User',
+                        email: user.email,
+                        createdAt: new Date(),
+                        role: 'user',
+                        photoURL: user.photoURL || null,
+                        emailVerified: user.emailVerified,
+                        provider: 'google'
+                    });
+                } catch (firestoreError) {
+                    console.error("Error saving Google user to Firestore:", firestoreError);
+                }
+            }
 
             redirectToAppFirstTime();
             return { success: true };
@@ -70,32 +101,67 @@ export const AuthProvider = ({ children }) => {
             return { success: true };
 
         } catch (err) {
-            return { success: false, error: err.message };
+            let errorMessage = "Login failed";
+
+            if (err.code === 'auth/user-not-found') {
+                errorMessage = "No account found with this email";
+            } else if (err.code === 'auth/wrong-password') {
+                errorMessage = "Incorrect password";
+            } else if (err.code === 'auth/invalid-email') {
+                errorMessage = "Invalid email address";
+            } else if (err.code === 'auth/user-disabled') {
+                errorMessage = "This account has been disabled";
+            }
+
+            return { success: false, error: errorMessage };
         }
     };
 
-    // 🔹 REGISTER USER
-    const registerUser = async (fullName, email, password) => {
+    // 🔹 REGISTER USER - FIXED VERSION WITH FIRESTORE
+    const registerUser = async (email, password, fullName) => {
         try {
+            // Create user with email and password
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
 
-            // 🔹 Create initials  
-            const initials = getInitials(fullName);
-
-            // 🔹 Store in Firestore
-            await setDoc(doc(db, "users", user.uid), {
-                fullName,
-                email,
-                initials,
-                createdAt: new Date(),
+            // Update user profile with display name
+            await updateProfile(userCredential.user, {
+                displayName: fullName
             });
 
-            redirectToAppFirstTime();
-            return { success: true };
+            // 🔥 Save user data to Firestore 'users' collection
+            try {
+                await setDoc(doc(db, 'users', userCredential.user.uid), {
+                    uid: userCredential.user.uid,
+                    fullName: fullName,
+                    email: email,
+                    createdAt: new Date(),
+                    role: 'user', // default role
+                    photoURL: userCredential.user.photoURL || null,
+                    emailVerified: userCredential.user.emailVerified
+                });
+            } catch (firestoreError) {
+                console.error("Error saving user to Firestore:", firestoreError);
+                // Continue even if Firestore save fails
+            }
 
-        } catch (err) {
-            return { success: false, error: err.message };
+            // 🔥 FIX: Redirect after successful signup
+            redirectToAppFirstTime();
+
+            return { success: true };
+        } catch (error) {
+            let errorMessage = "Registration failed";
+
+            if (error.code === 'auth/email-already-in-use') {
+                errorMessage = "This email is already registered";
+            } else if (error.code === 'auth/invalid-email') {
+                errorMessage = "Invalid email address";
+            } else if (error.code === 'auth/weak-password') {
+                errorMessage = "Password must be at least 6 characters";
+            } else if (error.code === 'auth/operation-not-allowed') {
+                errorMessage = "Email/password sign-up is not enabled";
+            }
+
+            return { success: false, error: errorMessage };
         }
     };
 
@@ -109,7 +175,7 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const unsub = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
-            setLoading(false);  // 🔥 FIX → Refresh par loader band
+            setLoading(false);
         });
 
         return () => unsub();

@@ -1,16 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Minus, Pencil, Trash2, ImagePlus, X, Calendar, Eye, AlertTriangle } from "lucide-react";
+import { Plus, Minus, Pencil, Trash2, ImagePlus, X, Calendar, Eye, AlertTriangle, Upload, BookOpen } from "lucide-react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import {
-    Dialog,
-    DialogContent,
-    DialogTitle,
-    IconButton,
-    Snackbar,
-    Alert,
-} from "@mui/material";
 import {
     collection,
     addDoc,
@@ -21,9 +13,8 @@ import {
     query,
     orderBy,
 } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
-import { db, storage } from "../firebase/config.js";
-import CenterLoader from "../Components/Loader/CenterLoader.jsx";
+import { db } from "../firebase/config.js";
+import CloudinaryUpload from "../Components/CloudinaryUpload.jsx";
 
 export default function ManageBlogs() {
     const [blogs, setBlogs] = useState([]);
@@ -35,36 +26,36 @@ export default function ManageBlogs() {
     const [blogToDelete, setBlogToDelete] = useState(null);
     const [loading, setLoading] = useState(false);
 
+    const [thumbnailUrl, setThumbnailUrl] = useState("");
+    const [imageUrls, setImageUrls] = useState([]);
+    const [showThumbnailUpload, setShowThumbnailUpload] = useState(false);
+    const [showImagesUpload, setShowImagesUpload] = useState(false);
+
     // Snackbar state
     const [snackbar, setSnackbar] = useState({
         open: false,
         message: "",
-        severity: "success", // success, error, warning, info
+        severity: "success",
     });
 
     const empty = {
         id: "",
         title: "",
         content: "",
-        thumbnail: null,
+        thumbnail: "",
         images: [],
     };
 
     const [blogData, setBlogData] = useState(empty);
-    const [thumbnailFile, setThumbnailFile] = useState(null);
-    const [thumbnailPreview, setThumbnailPreview] = useState(null);
-    const [imageFiles, setImageFiles] = useState([]);
-    const [imagePreviews, setImagePreviews] = useState([]);
 
     const blogsCol = collection(db, "blogs");
 
     // Snackbar handlers
     const showSnackbar = (message, severity = "success") => {
         setSnackbar({ open: true, message, severity });
-    };
-
-    const handleCloseSnackbar = () => {
-        setSnackbar({ ...snackbar, open: false });
+        setTimeout(() => {
+            setSnackbar({ ...snackbar, open: false });
+        }, 4000);
     };
 
     // ---------- Firestore fetch ----------
@@ -84,33 +75,15 @@ export default function ManageBlogs() {
         fetchBlogs();
     }, []);
 
-    // ---------- Storage helpers ----------
-    const uploadFile = async (file, path) => {
-        const storageRef = ref(storage, path);
-        await uploadBytes(storageRef, file);
-        const url = await getDownloadURL(storageRef);
-        return { url, path };
-    };
-
-    const deleteStoragePath = async (path) => {
-        if (!path) return;
-        try {
-            const objRef = ref(storage, path);
-            await deleteObject(objRef);
-        } catch (err) {
-            console.warn("deleteStoragePath failed:", path, err.message);
-        }
-    };
-
     // ---------- Form handlers ----------
     const resetForm = () => {
         setBlogData(empty);
-        setThumbnailFile(null);
-        setThumbnailPreview(null);
-        setImageFiles([]);
-        setImagePreviews([]);
+        setThumbnailUrl("");
+        setImageUrls([]);
         setEditMode(false);
         setIsCollapseOpen(false);
+        setShowThumbnailUpload(false);
+        setShowImagesUpload(false);
     };
 
     const handleInput = (e) => {
@@ -118,38 +91,22 @@ export default function ManageBlogs() {
         setBlogData((s) => ({ ...s, [name]: value }));
     };
 
-    const handleThumbnailChange = (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        setThumbnailFile(file);
-        setThumbnailPreview(URL.createObjectURL(file));
+    const handleThumbnailUpload = (url) => {
+        setThumbnailUrl(url);
+        setBlogData((s) => ({ ...s, thumbnail: url }));
+        setShowThumbnailUpload(false);
     };
 
-    const handleImagesChange = (e) => {
-        const files = Array.from(e.target.files || []);
-        if (!files.length) return;
-
-        const newFiles = [...imageFiles, ...files];
-        const newPreviews = [...imagePreviews, ...files.map((f) => URL.createObjectURL(f))];
-
-        setImageFiles(newFiles);
-        setImagePreviews(newPreviews);
+    const handleImageUpload = (url) => {
+        const newImages = [...imageUrls, url];
+        setImageUrls(newImages);
+        setBlogData((s) => ({ ...s, images: newImages }));
     };
 
-    const removeNewImage = (index) => {
-        const newFiles = imageFiles.filter((_, i) => i !== index);
-        const newPreviews = imagePreviews.filter((_, i) => i !== index);
-        setImageFiles(newFiles);
-        setImagePreviews(newPreviews);
-    };
-
-    const removeExistingImage = async (index) => {
-        const imageToRemove = blogData.images[index];
-        if (imageToRemove?.path) {
-            await deleteStoragePath(imageToRemove.path);
-        }
-        const updatedImages = blogData.images.filter((_, i) => i !== index);
-        setBlogData((s) => ({ ...s, images: updatedImages }));
+    const removeImage = (index) => {
+        const newImages = imageUrls.filter((_, i) => i !== index);
+        setImageUrls(newImages);
+        setBlogData((s) => ({ ...s, images: newImages }));
     };
 
     // ---------- Add / Update Blog ----------
@@ -162,38 +119,19 @@ export default function ManageBlogs() {
         setLoading(true);
         try {
             const now = Date.now();
-            const base = {
+            const payload = {
                 title: blogData.title,
                 content: blogData.content || "",
-                thumbnail: null,
-                images: [],
+                thumbnail: thumbnailUrl || "",
+                images: imageUrls || [],
                 createdAt: now,
                 updatedAt: now,
             };
-            const docRef = await addDoc(blogsCol, base);
 
-            let thumbnailObj = null;
-            if (thumbnailFile) {
-                const tPath = `blogs/${docRef.id}/thumbnail_${Date.now()}_${thumbnailFile.name}`;
-                thumbnailObj = await uploadFile(thumbnailFile, tPath);
-            }
-
-            const imagesArr = [];
-            for (const f of imageFiles) {
-                const p = `blogs/${docRef.id}/images/${Date.now()}_${f.name}`;
-                const obj = await uploadFile(f, p);
-                imagesArr.push(obj);
-            }
-
-            await updateDoc(doc(db, "blogs", docRef.id), {
-                thumbnail: thumbnailObj,
-                images: imagesArr,
-                updatedAt: Date.now(),
-            });
-
-            showSnackbar("Blog added successfully! 🎉", "success");
-            fetchBlogs();
+            await addDoc(blogsCol, payload);
+            await fetchBlogs();
             resetForm();
+            showSnackbar("Blog added successfully! 🎉", "success");
         } catch (err) {
             console.error("Add blog err:", err);
             showSnackbar("Error adding blog: " + err.message, "error");
@@ -212,34 +150,18 @@ export default function ManageBlogs() {
         try {
             const docRef = doc(db, "blogs", blogData.id);
 
-            let thumbnailObj = blogData.thumbnail || null;
-            if (thumbnailFile) {
-                if (thumbnailObj?.path) await deleteStoragePath(thumbnailObj.path);
-                const tPath = `blogs/${blogData.id}/thumbnail_${Date.now()}_${thumbnailFile.name}`;
-                thumbnailObj = await uploadFile(thumbnailFile, tPath);
-            }
-
-            let imagesArr = blogData.images || [];
-            if (imageFiles.length) {
-                const uploaded = [];
-                for (const f of imageFiles) {
-                    const p = `blogs/${blogData.id}/images/${Date.now()}_${f.name}`;
-                    const obj = await uploadFile(f, p);
-                    uploaded.push(obj);
-                }
-                imagesArr = [...imagesArr, ...uploaded];
-            }
-
-            await updateDoc(docRef, {
-                ...blogData,
-                thumbnail: thumbnailObj,
-                images: imagesArr,
+            const payload = {
+                title: blogData.title,
+                content: blogData.content || "",
+                thumbnail: thumbnailUrl || blogData.thumbnail || "",
+                images: imageUrls.length ? imageUrls : blogData.images || [],
                 updatedAt: Date.now(),
-            });
+            };
 
-            showSnackbar("Blog updated successfully! ✨", "success");
-            fetchBlogs();
+            await updateDoc(docRef, payload);
+            await fetchBlogs();
             resetForm();
+            showSnackbar("Blog updated successfully! ✨", "success");
         } catch (err) {
             console.error("Update blog err:", err);
             showSnackbar("Error updating blog: " + err.message, "error");
@@ -264,12 +186,6 @@ export default function ManageBlogs() {
 
         setLoading(true);
         try {
-            if (blogToDelete.thumbnail?.path) await deleteStoragePath(blogToDelete.thumbnail.path);
-            if (Array.isArray(blogToDelete.images)) {
-                for (const img of blogToDelete.images) {
-                    if (img?.path) await deleteStoragePath(img.path);
-                }
-            }
             await deleteDoc(doc(db, "blogs", blogToDelete.id));
             showSnackbar("Blog deleted successfully!", "success");
             fetchBlogs();
@@ -289,13 +205,11 @@ export default function ManageBlogs() {
             id: b.id,
             title: b.title || "",
             content: b.content || "",
-            thumbnail: b.thumbnail || null,
+            thumbnail: b.thumbnail || "",
             images: b.images || [],
         });
-        setThumbnailPreview(b.thumbnail?.url || null);
-        setImagePreviews([]);
-        setThumbnailFile(null);
-        setImageFiles([]);
+        setThumbnailUrl(b.thumbnail || "");
+        setImageUrls(b.images || []);
         setIsCollapseOpen(true);
     };
 
@@ -327,27 +241,33 @@ export default function ManageBlogs() {
     };
 
     return (
-        <div className="p-6 max-w-7xl mx-auto">
-            {/* Loading Overlay */}
-            {loading && <CenterLoader />}
-
-            <div className="mb-8">
-                <h1 className="text-4xl font-bold text-[#113471] mb-2">Manage Blogs</h1>
+        <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+            <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-8"
+            >
+                <h1 className="text-4xl font-bold text-[#113471] mb-2 flex items-center gap-3">
+                    <BookOpen className="h-10 w-10 text-[#ff6575]" />
+                    Manage Blogs
+                </h1>
                 <p className="text-gray-600">Create, edit, and manage your blog posts</p>
-            </div>
+            </motion.div>
 
             {/* Add/Edit Button */}
-            <button
+            <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => {
                     if (isCollapseOpen && editMode) resetForm();
                     setIsCollapseOpen((s) => !s);
                     setEditMode(false);
                 }}
-                className="flex items-center gap-2 bg-gradient-to-r from-[#113471] to-[#1a4a8f] text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                className="flex items-center gap-2 bg-gradient-to-r from-[#113471] to-[#1a4a8f] text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 mb-6"
             >
                 {isCollapseOpen ? <Minus size={20} /> : <Plus size={20} />}
                 {editMode ? "Edit Blog" : "Add New Blog"}
-            </button>
+            </motion.button>
 
             {/* COLLAPSE FORM */}
             <AnimatePresence>
@@ -357,179 +277,200 @@ export default function ManageBlogs() {
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.35 }}
-                        className="overflow-hidden bg-white rounded-2xl border-2 border-gray-200 shadow-xl p-6 mt-6"
+                        className="overflow-hidden"
                     >
-                        <h2 className="text-2xl font-bold text-[#113471] mb-6">
-                            {editMode ? "Edit Blog" : "Create New Blog"}
-                        </h2>
+                        <div className="bg-white rounded-2xl border-2 border-gray-200 shadow-xl p-6 mb-6 max-h-[600px] overflow-y-auto">
+                            <div className="space-y-5">
+                                <div>
+                                    <label className="block font-semibold text-gray-700 mb-2">
+                                        Blog Title *
+                                    </label>
+                                    <input
+                                        name="title"
+                                        placeholder="Enter blog title"
+                                        value={blogData.title}
+                                        onChange={handleInput}
+                                        className="border-2 border-gray-300 focus:border-[#113471] focus:ring-4 focus:ring-[#113471]/20 p-3 rounded-xl w-full outline-none transition"
+                                    />
+                                </div>
 
-                        <div className="space-y-5">
-                            <div>
-                               
-                                <input
-                                    name="title"
-                                    placeholder="Enter blog title"
-                                    value={blogData.title}
-                                    onChange={handleInput}
-                                    className="border-2 border-gray-300 focus:border-[#113471] p-3 rounded-lg w-full outline-none transition"
-                                />
-                            </div>
+                                {/* THUMBNAIL UPLOAD */}
+                                <div>
+                                    <label className="block font-semibold text-gray-700 mb-2">
+                                        <Upload className="inline h-5 w-5 mr-2" />
+                                        Thumbnail Image
+                                    </label>
 
-                            <div>
-                                <label className="block font-semibold text-gray-700 mb-2">
-                                    Thumbnail Image
-                                </label>
-                                <div className="w-full h-48 bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center relative overflow-hidden hover:border-[#113471] transition group">
-                                    {thumbnailPreview ? (
-                                        <>
-                                            <img
-                                                src={thumbnailPreview}
-                                                alt="thumb"
-                                                className="w-full h-full object-cover"
-                                            />
+                                    {thumbnailUrl ? (
+                                        <div className="relative w-full h-48 rounded-xl overflow-hidden border-2 border-gray-200">
+                                            <img src={thumbnailUrl} alt="thumbnail" className="w-full h-full object-cover" />
                                             <button
+                                                type="button"
                                                 onClick={() => {
-                                                    setThumbnailFile(null);
-                                                    setThumbnailPreview(null);
+                                                    setThumbnailUrl("");
+                                                    setBlogData((s) => ({ ...s, thumbnail: "" }));
                                                 }}
                                                 className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
                                             >
                                                 <X size={16} />
                                             </button>
-                                        </>
+                                        </div>
                                     ) : (
-                                        <div className="text-gray-500 flex flex-col items-center">
-                                            <ImagePlus size={40} className="mb-2" />
-                                            <p className="font-medium">Click to upload thumbnail</p>
-                                            <p className="text-sm text-gray-400">PNG, JPG up to 10MB</p>
+                                        <>
+                                            {!showThumbnailUpload ? (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowThumbnailUpload(true)}
+                                                    className="w-full h-48 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-dashed border-blue-300 rounded-xl flex flex-col items-center justify-center hover:border-[#113471] transition cursor-pointer"
+                                                >
+                                                    <ImagePlus size={40} className="mb-2 text-[#113471]" />
+                                                    <p className="font-medium text-gray-600">Click to upload thumbnail</p>
+                                                    <p className="text-sm text-gray-400">Cloudinary Upload</p>
+                                                </button>
+                                            ) : (
+                                                <div className="border-2 border-[#113471] rounded-xl p-4">
+                                                    <CloudinaryUpload onUpload={handleThumbnailUpload} />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowThumbnailUpload(false)}
+                                                        className="mt-3 text-red-600 hover:underline"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
+
+                                {/* ADDITIONAL IMAGES UPLOAD */}
+                                <div>
+                                    <label className="block font-semibold text-gray-700 mb-2">
+                                        <ImagePlus className="inline h-5 w-5 mr-2" />
+                                        Additional Images
+                                    </label>
+
+                                    {imageUrls.length > 0 && (
+                                        <div className="grid grid-cols-4 gap-3 mb-4">
+                                            {imageUrls.map((img, i) => (
+                                                <div key={i} className="relative group">
+                                                    <img src={img} alt={`img-${i}`} className="w-full h-24 object-cover rounded-lg border-2 border-gray-200" />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeImage(i)}
+                                                        className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
+                                                    >
+                                                        <X size={14} />
+                                                    </button>
+                                                </div>
+                                            ))}
                                         </div>
                                     )}
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleThumbnailChange}
-                                        className="absolute inset-0 opacity-0 cursor-pointer"
+
+                                    {!showImagesUpload ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowImagesUpload(true)}
+                                            className="w-full py-3 bg-blue-50 border-2 border-dashed border-blue-300 rounded-xl text-[#113471] font-medium hover:bg-blue-100 transition"
+                                        >
+                                            + Add More Images
+                                        </button>
+                                    ) : (
+                                        <div className="border-2 border-[#113471] rounded-xl p-4">
+                                            <CloudinaryUpload onUpload={handleImageUpload} />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowImagesUpload(false)}
+                                                className="mt-3 text-red-600 hover:underline"
+                                            >
+                                                Done
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="block font-semibold text-gray-700 mb-2">
+                                        Blog Content
+                                    </label>
+                                    <ReactQuill
+                                        theme="snow"
+                                        value={blogData.content}
+                                        onChange={(val) => setBlogData((s) => ({ ...s, content: val }))}
+                                        className="bg-white rounded-lg"
+                                        style={{ minHeight: "250px" }}
                                     />
                                 </div>
-                            </div>
 
-                            <div>
-                                <label className="block font-semibold text-gray-700 mb-2">
-                                    Additional Images
-                                </label>
-                                <input
-                                    type="file"
-                                    multiple
-                                    accept="image/*"
-                                    onChange={handleImagesChange}
-                                    className="border-2 border-gray-300 focus:border-[#113471] p-3 w-full rounded-lg outline-none transition file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#113471] file:text-white hover:file:bg-[#0d2a59] file:cursor-pointer"
-                                />
-
-                                {editMode && blogData.images && blogData.images.length > 0 && (
-                                    <div className="mt-4">
-                                        <p className="text-sm font-semibold text-gray-600 mb-2">Existing Images:</p>
-                                        <div className="grid grid-cols-4 gap-3">
-                                            {blogData.images.map((img, i) => (
-                                                <div key={i} className="relative group">
-                                                    <img
-                                                        src={img.url}
-                                                        alt={`existing-${i}`}
-                                                        className="w-full h-24 object-cover rounded-lg border-2 border-gray-200"
-                                                    />
-                                                    <button
-                                                        onClick={() => removeExistingImage(i)}
-                                                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition hover:bg-red-600"
-                                                    >
-                                                        <X size={14} />
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {imagePreviews.length > 0 && (
-                                    <div className="mt-4">
-                                        <p className="text-sm font-semibold text-gray-600 mb-2">
-                                            New Images to Upload:
-                                        </p>
-                                        <div className="grid grid-cols-4 gap-3">
-                                            {imagePreviews.map((img, i) => (
-                                                <div key={i} className="relative group">
-                                                    <img
-                                                        src={img}
-                                                        alt={`preview-${i}`}
-                                                        className="w-full h-24 object-cover rounded-lg border-2 border-blue-300"
-                                                    />
-                                                    <button
-                                                        onClick={() => removeNewImage(i)}
-                                                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition hover:bg-red-600"
-                                                    >
-                                                        <X size={14} />
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div>
-                                <label className="block font-semibold text-gray-700 mb-2">
-                                    Blog Content
-                                </label>
-                                <ReactQuill
-                                    theme="snow"
-                                    value={blogData.content}
-                                    onChange={(val) => setBlogData((s) => ({ ...s, content: val }))}
-                                    className="bg-white rounded-lg"
-                                    style={{ minHeight: "250px" }}
-                                />
-                            </div>
-
-                            <div className="flex justify-end gap-4 pt-4">
-                                <button
-                                    onClick={resetForm}
-                                    className="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg font-medium transition"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={editMode ? handleUpdate : handleAdd}
-                                    disabled={loading}
-                                    className="px-6 py-3 bg-gradient-to-r from-[#113471] to-[#1a4a8f] text-white rounded-lg font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {editMode ? "Update Blog" : "Add Blog"}
-                                </button>
+                                <div className="flex justify-end gap-4 mt-6 pt-6 border-t-2 border-gray-200">
+                                    <button
+                                        onClick={resetForm}
+                                        disabled={loading}
+                                        className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-semibold transition disabled:opacity-50"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={editMode ? handleUpdate : handleAdd}
+                                        disabled={loading}
+                                        className="px-6 py-3 bg-gradient-to-r from-[#113471] to-[#1a4a8f] text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition disabled:opacity-50"
+                                    >
+                                        {editMode ? "Update Blog" : "Add Blog"}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
 
+            {/* Loading Overlay */}
+            <AnimatePresence>
+                {loading && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.8 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0.8 }}
+                            className="bg-white p-8 rounded-2xl shadow-2xl flex flex-col items-center"
+                        >
+                            <div className="animate-spin h-16 w-16 border-4 border-[#113471] border-t-transparent rounded-full mb-4"></div>
+                            <p className="text-xl font-bold text-gray-800">Processing...</p>
+                            <p className="text-gray-600 mt-2">Please wait</p>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* BLOG CARDS */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
                 {blogs.map((b) => (
                     <motion.div
                         key={b.id}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-white border-2 border-gray-200 rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden cursor-pointer transform hover:scale-[1.02] transition-all duration-300 group"
+                        whileHover={{ y: -5 }}
+                        className="bg-white border-2 border-gray-200 rounded-2xl shadow-lg hover:shadow-2xl overflow-hidden cursor-pointer transition-all"
                         onClick={() => openViewDialog(b)}
                     >
                         <div className="relative overflow-hidden h-56">
                             <img
-                                src={b.thumbnail?.url || "https://via.placeholder.com/400x300?text=No+Image"}
+                                src={b.thumbnail || "https://via.placeholder.com/400x300?text=No+Image"}
                                 alt={b.title}
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
                                 <Eye size={32} className="text-white" />
                             </div>
                         </div>
 
                         <div className="p-5">
-                            <h3 className="text-xl font-bold text-[#113471] mb-2 line-clamp-2 group-hover:text-[#ff6575] transition-colors">
+                            <h3 className="text-xl font-bold text-[#113471] mb-2 line-clamp-2 hover:text-[#ff6575] transition-colors">
                                 {b.title}
                             </h3>
 
@@ -542,16 +483,16 @@ export default function ManageBlogs() {
                                 {formatDate(b.createdAt)}
                             </div>
 
-                            <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+                            <div className="flex justify-between items-center pt-4 border-t-2 border-gray-100">
                                 <button
                                     onClick={(e) => openEdit(b, e)}
-                                    className="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium transition"
+                                    className="flex items-center gap-1 text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg transition font-semibold"
                                 >
                                     <Pencil size={16} /> Edit
                                 </button>
                                 <button
                                     onClick={(e) => openDeleteDialog(b, e)}
-                                    className="flex items-center gap-1 text-red-600 hover:text-red-800 font-medium transition"
+                                    className="flex items-center gap-1 text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg transition font-semibold"
                                 >
                                     <Trash2 size={16} /> Delete
                                 </button>
@@ -562,160 +503,181 @@ export default function ManageBlogs() {
             </div>
 
             {/* DELETE CONFIRMATION DIALOG */}
-            <Dialog
-                open={deleteDialogOpen}
-                onClose={closeDeleteDialog}
-                maxWidth="sm"
-                fullWidth
-                PaperProps={{
-                    style: {
-                        borderRadius: "16px",
-                    },
-                }}
-            >
-                <motion.div
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.9, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                >
-                    <DialogContent className="p-8 text-center">
+            <AnimatePresence>
+                {deleteDialogOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                        onClick={closeDeleteDialog}
+                    >
                         <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-                            className="mx-auto w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6"
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8"
                         >
-                            <AlertTriangle size={40} className="text-red-600" />
+                            <div className="text-center">
+                                <motion.div
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+                                    className="mx-auto w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6"
+                                >
+                                    <AlertTriangle size={40} className="text-red-600" />
+                                </motion.div>
+
+                                <h2 className="text-2xl font-bold text-gray-800 mb-3">
+                                    Delete Blog?
+                                </h2>
+                                <p className="text-gray-600 mb-2">
+                                    Are you sure you want to delete this blog?
+                                </p>
+                                {blogToDelete && (
+                                    <p className="font-semibold text-[#113471] mb-6">
+                                        "{blogToDelete.title}"
+                                    </p>
+                                )}
+                                <p className="text-sm text-red-600 mb-6">
+                                    This action cannot be undone.
+                                </p>
+
+                                <div className="flex gap-4 justify-center">
+                                    <button
+                                        onClick={closeDeleteDialog}
+                                        className="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg font-medium transition"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleDelete}
+                                        disabled={loading}
+                                        className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition disabled:opacity-50"
+                                    >
+                                        {loading ? "Deleting..." : "Yes, Delete"}
+                                    </button>
+                                </div>
+                            </div>
                         </motion.div>
-
-                        <h2 className="text-2xl font-bold text-gray-800 mb-3">
-                            Delete Blog?
-                        </h2>
-                        <p className="text-gray-600 mb-2">
-                            Are you sure you want to delete this blog?
-                        </p>
-                        {blogToDelete && (
-                            <p className="font-semibold text-[#113471] mb-6">
-                                "{blogToDelete.title}"
-                            </p>
-                        )}
-                        <p className="text-sm text-red-600 mb-6">
-                            This action cannot be undone. All images and content will be permanently deleted.
-                        </p>
-
-                        <div className="flex gap-4 justify-center">
-                            <button
-                                onClick={closeDeleteDialog}
-                                className="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg font-medium transition"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleDelete}
-                                disabled={loading}
-                                className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {loading ? "Deleting..." : "Yes, Delete"}
-                            </button>
-                        </div>
-                    </DialogContent>
-                </motion.div>
-            </Dialog>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* VIEW DIALOG */}
-            <Dialog
-                open={viewDialogOpen}
-                onClose={closeViewDialog}
-                maxWidth="md"
-                fullWidth
-                PaperProps={{
-                    style: {
-                        borderRadius: "16px",
-                        maxHeight: "90vh",
-                    },
-                }}
-            >
-                <DialogTitle className="bg-gradient-to-r from-[#113471] to-[#1a4a8f] text-white">
-                    <div className="flex justify-between items-center">
-                        <span className="text-2xl font-bold">Blog Details</span>
-                        <IconButton onClick={closeViewDialog} sx={{ color: "white" }}>
-                            <X />
-                        </IconButton>
-                    </div>
-                </DialogTitle>
-
-                <DialogContent className="p-6 mt-4">
-                    {selectedBlog && (
-                        <div className="space-y-5">
-                            <div>
-                                <h2 className="text-3xl font-bold text-[#113471] mb-3">
-                                    {selectedBlog.title}
-                                </h2>
-                                <div className="flex items-center text-gray-500 text-sm mb-4">
-                                    <Calendar size={16} className="mr-2" />
-                                    Created: {formatDate(selectedBlog.createdAt)} | Updated:{" "}
-                                    {formatDate(selectedBlog.updatedAt)}
-                                </div>
+            <AnimatePresence>
+                {viewDialogOpen && selectedBlog && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                        onClick={closeViewDialog}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+                        >
+                            <div className="bg-gradient-to-r from-[#113471] to-[#1a4a8f] text-white p-6 flex justify-between items-center">
+                                <span className="text-2xl font-bold">Blog Details</span>
+                                <button
+                                    onClick={closeViewDialog}
+                                    className="text-white hover:bg-white/20 p-2 rounded-full transition"
+                                >
+                                    <X size={24} />
+                                </button>
                             </div>
 
-                            {selectedBlog.thumbnail?.url && (
-                                <div className="rounded-xl overflow-hidden border-2 border-gray-200">
-                                    <img
-                                        src={selectedBlog.thumbnail.url}
-                                        alt={selectedBlog.title}
-                                        className="w-full h-80 object-cover"
-                                    />
-                                </div>
-                            )}
-
-                            <div className="border-t pt-4">
-                                <h3 className="text-xl font-bold text-gray-800 mb-3">Content</h3>
-                                <div
-                                    className="prose max-w-none text-gray-700 leading-relaxed"
-                                    dangerouslySetInnerHTML={{ __html: selectedBlog.content }}
-                                />
-                            </div>
-
-                            {selectedBlog.images && selectedBlog.images.length > 0 && (
-                                <div className="border-t pt-4">
-                                    <h3 className="text-xl font-bold text-gray-800 mb-3">
-                                        Gallery ({selectedBlog.images.length} images)
-                                    </h3>
-                                    <div className="grid grid-cols-3 gap-4">
-                                        {selectedBlog.images.map((img, i) => (
-                                            <img
-                                                key={i}
-                                                src={img.url}
-                                                alt={`Gallery ${i + 1}`}
-                                                className="w-full h-32 object-cover rounded-lg border-2 border-gray-200 hover:border-[#113471] transition cursor-pointer"
-                                                onClick={() => window.open(img.url, "_blank")}
-                                            />
-                                        ))}
+                            <div className="p-6 overflow-y-auto">
+                                <div className="space-y-5">
+                                    <div>
+                                        <h2 className="text-3xl font-bold text-[#113471] mb-3">
+                                            {selectedBlog.title}
+                                        </h2>
+                                        <div className="flex items-center text-gray-500 text-sm mb-4">
+                                            <Calendar size={16} className="mr-2" />
+                                            Created: {formatDate(selectedBlog.createdAt)} | Updated:{" "}
+                                            {formatDate(selectedBlog.updatedAt)}
+                                        </div>
                                     </div>
+
+                                    {selectedBlog.thumbnail && (
+                                        <div className="rounded-xl overflow-hidden border-2 border-gray-200">
+                                            <img
+                                                src={selectedBlog.thumbnail}
+                                                alt={selectedBlog.title}
+                                                className="w-full h-80 object-cover"
+                                            />
+                                        </div>
+                                    )}
+
+                                    <div className="border-t pt-4">
+                                        <h3 className="text-xl font-bold text-gray-800 mb-3">Content</h3>
+                                        <div
+                                            className="prose max-w-none text-gray-700 leading-relaxed"
+                                            dangerouslySetInnerHTML={{ __html: selectedBlog.content }}
+                                        />
+                                    </div>
+
+                                    {selectedBlog.images && selectedBlog.images.length > 0 && (
+                                        <div className="border-t pt-4">
+                                            <h3 className="text-xl font-bold text-gray-800 mb-3">
+                                                Gallery ({selectedBlog.images.length} images)
+                                            </h3>
+                                            <div className="grid grid-cols-3 gap-4">
+                                                {selectedBlog.images.map((img, i) => (
+                                                    <img
+                                                        key={i}
+                                                        src={img}
+                                                        alt={`Gallery ${i + 1}`}
+                                                        className="w-full h-32 object-cover rounded-lg border-2 border-gray-200 hover:border-[#113471] transition cursor-pointer"
+                                                        onClick={() => window.open(img, "_blank")}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
-                        </div>
-                    )}
-                </DialogContent>
-            </Dialog>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* SNACKBAR */}
-            <Snackbar
-                open={snackbar.open}
-                autoHideDuration={4000}
-                onClose={handleCloseSnackbar}
-                anchorOrigin={{ vertical: "top", horizontal: "center" }}
-            >
-                <Alert
-                    onClose={handleCloseSnackbar}
-                    severity={snackbar.severity}
-                    variant="filled"
-                    sx={{ width: "100%" }}
-                >
-                    {snackbar.message}
-                </Alert>
-            </Snackbar>
+            <AnimatePresence>
+                {snackbar.open && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -50 }}
+                        className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50"
+                    >
+                        <div
+                            className={`px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 ${snackbar.severity === "success"
+                                    ? "bg-green-500 text-white"
+                                    : snackbar.severity === "error"
+                                        ? "bg-red-500 text-white"
+                                        : snackbar.severity === "warning"
+                                            ? "bg-yellow-500 text-white"
+                                            : "bg-blue-500 text-white"
+                                }`}
+                        >
+                            <span className="font-semibold">{snackbar.message}</span>
+                            <button
+                                onClick={() => setSnackbar({ ...snackbar, open: false })}
+                                className="hover:bg-white/20 p-1 rounded-full transition"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
