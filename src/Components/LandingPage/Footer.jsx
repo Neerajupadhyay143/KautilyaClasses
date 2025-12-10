@@ -126,7 +126,7 @@ function Footer() {
             {/* Bottom bar */}
             <div className="text-center border-t border-white/10 mt-10 pt-6">
                 <p className="text-sm">
-                    © 2025 Kautilya Vision Classes. All rights reserved.
+                    © 2025 Kautilya Law Institute. All rights reserved.
                 </p>
             </div>
         </footer>
