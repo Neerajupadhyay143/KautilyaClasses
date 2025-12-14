@@ -86,11 +86,11 @@ function Footer() {
                         <h3 className="text-xl font-semibold mb-4">Courses</h3>
 
                         <ul className="space-y-2 text-sm">
-                            <NavLink to="/courses/clat" className="hover:text-[#ff6575] block">CLAT 2026-27</NavLink>
-                            <NavLink to="/courses/cuet" className="hover:text-[#ff6575] block">CUET (UG)</NavLink>
-                            <NavLink to="/courses/mh-cet" className="hover:text-[#ff6575] block">MH-CET</NavLink>
-                            <NavLink to="/courses/mdu-ba-llb" className="hover:text-[#ff6575] block">MDU BA-LLB (5 Years) Law Entrance Exam</NavLink>
-                            <NavLink to="/courses/state-law" className="hover:text-[#ff6575] block">State Law Entrance Exams</NavLink>
+                            <NavLink to="/courses" className="hover:text-[#ff6575] block">CLAT 2026-27</NavLink>
+                            <NavLink to="/courses" className="hover:text-[#ff6575] block">CUET (UG)</NavLink>
+                            <NavLink to="/courses" className="hover:text-[#ff6575] block">MH-CET</NavLink>
+                            <NavLink to="/courses" className="hover:text-[#ff6575] block">MDU BA-LLB (5 Years) Law Entrance Exam</NavLink>
+                            <NavLink to="/courses" className="hover:text-[#ff6575] block">State Law Entrance Exams</NavLink>
                         </ul>
 
 

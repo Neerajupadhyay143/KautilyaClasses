@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { CheckCircle, Star, Video, BookOpen, Users, Play } from "lucide-react";
-
+import { CheckCircle, Star, Video, BookOpen, Users, Play, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 export default function AboutPage() {
 
     const Motion = ({ children, className, delay = 0, duration = 0.5, type = 'fadeUp' }) => {
@@ -56,11 +56,32 @@ export default function AboutPage() {
         <div className="flex flex-col">
 
             {/* ==== HERO SECTION ==== */}
-            <section className="w-full bg-[#0f3069] py-28 text-center mt-40">
-                <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">About Us</h1>
-                <p className="text-gray-200">
-                    <span className="text-[#ff6575] font-semibold">Home</span> / About
-                </p>
+            <section className="w-full relative bg-gradient-to-br from-[#0f3069] via-[#1a4d8f] to-[#0f3069] py-32 text-center mt-40 overflow-hidden">
+                <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-20 left-10 w-72 h-72 bg-[#ff6575] rounded-full blur-3xl"></div>
+                    <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-400 rounded-full blur-3xl"></div>
+                </div>
+                <div className="relative z-10">
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                        className="flex items-center justify-center gap-3 mb-4"
+                    >
+                        <Sparkles className="h-10 w-10 text-[#ff6575]" />
+                        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white">
+                            About Us
+                        </h2>
+                    </motion.div>
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                        className="text-gray-200 text-lg sm:text-xl mt-4 max-w-3xl mx-auto px-4"
+                    >
+                        Helping learners unlock their potential through simple insights, practical tips, and meaningful guidance.
+                    </motion.p>
+                </div>
             </section>
 
             {/* ==== WHO WE ARE ==== */}
@@ -75,7 +96,7 @@ export default function AboutPage() {
                             </h2>
 
                             <p className="text-gray-700 mb-6 text-lg">
-                                Founded in 2015, Kautilya Law Institute has built a strong reputation 
+                                Founded in 2015, Kautilya Law Institute has built a strong reputation
                                 as one of Rohtak’s most trusted centres for law entrance exam preparation.
                                 With over <b>10+ years of legacy</b>, we have guided thousands of aspirants
                                 toward success in Judiciary, Attorney exams, CLAT, and CUET(UG).
@@ -83,7 +104,7 @@ export default function AboutPage() {
 
                             <p className="text-gray-700 text-lg">
                                 Our mission is simple — to provide <b>quality education, personalised guidance,
-                                and exam-focused preparation</b> to every student who walks through our doors.
+                                    and exam-focused preparation</b> to every student who walks through our doors.
                             </p>
                         </div>
                     </Motion>

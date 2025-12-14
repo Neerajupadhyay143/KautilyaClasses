@@ -261,7 +261,10 @@ export default function ManageCourses() {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block font-semibold text-gray-700 mb-2">Category</label>
+                                        <label className="block font-semibold text-gray-700 mb-2">
+                                            Category
+                                        </label>
+
                                         <select
                                             name="category"
                                             value={courseData.category}
@@ -269,13 +272,20 @@ export default function ManageCourses() {
                                             className="border-2 border-gray-300 focus:border-[#113471] focus:ring-4 focus:ring-[#113471]/20 p-3 rounded-xl w-full outline-none transition"
                                         >
                                             <option value="">Select Category</option>
+
                                             <option value="UPSC">UPSC</option>
                                             <option value="SSC">SSC</option>
                                             <option value="Banking">Banking</option>
                                             <option value="Railways">Railways</option>
                                             <option value="State Exams">State Exams</option>
+
+                                            {/* New Categories */}
+                                            <option value="CLAT">CLAT</option>
+                                            <option value="CUET(UG)">CUET (UG)</option>
+                                            <option value="Law Entrance Exams">Law Entrance Exams</option>
                                         </select>
                                     </div>
+
 
                                     <div>
                                         <label className="block font-semibold text-gray-700 mb-2">Level</label>

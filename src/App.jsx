@@ -18,6 +18,8 @@ import AdminProtected from "./admin/AdminProtected";
 import { SnackbarProvider } from "notistack";
 import { useAuth } from "./context/AuthContext";
 import CenterLoader from "./Components/Loader/CenterLoader";
+import PrivacyPolicy from "./Components/LandingPageComponents/PrivacyPolicy";
+import TermsAndConditions from "./Components/LandingPageComponents/TermsAndConditions";
 
 function App() {
   const { loading } = useAuth();   // 🔥 yaha useAuth safe hai kyuki SnackbarProvider wrapper ke andar hoga
@@ -38,6 +40,10 @@ function App() {
             <Route path="courses" element={<Courses />} />
             <Route path="blogs" element={<Blogs />} />
             <Route path="auth" element={<AuthPage />} />
+            <Route path="privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="terms" element={<TermsAndConditions />} />
+
+            {/*terms  */}
           </Route>
 
           {/* ADMIN LOGIN */}

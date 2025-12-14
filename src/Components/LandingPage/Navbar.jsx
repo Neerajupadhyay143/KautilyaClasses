@@ -252,7 +252,7 @@ export default function Navbar() {
                     <div className="relative w-full max-w-3xl mx-4">
                         <button
                             onClick={() => setOpenLogin(false)}
-                            className="absolute -top-4 -right-4 bg-[#ff6575] p-2 rounded-full text-white shadow-lg hover:bg-[#ff4560] transition-all z-10 hover:scale-110"
+                            className="absolute top-0 -right-2 bg-[#ff6575] p-2 rounded-full text-white shadow-lg hover:bg-[#ff4560] transition-all z-10 hover:scale-110"
                         >
                             <X size={20} />
                         </button>

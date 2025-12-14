@@ -15,12 +15,11 @@ const iconsMap = {
 
 const examCategories = [
     { name: "All", icon: BookOpen },
-    { name: "UPSC", icon: BookOpen },
-    { name: "SSC", icon: Gavel },
-    { name: "Banking", icon: Building },
-    { name: "Railways", icon: Scale },
-    { name: "State Exams", icon: Globe },
+    { name: "CLAT", icon: BookOpen },
+    { name: "CUET(UG)", icon: Gavel },
+
 ];
+
 
 // Custom Star Rating Component
 const StarRating = ({ rating, size = "small" }) => {
@@ -49,7 +48,9 @@ const StarRating = ({ rating, size = "small" }) => {
 };
 
 // Course Details Drawer Component
-const CourseDrawer = ({ course, isOpen, onClose }) => {
+const CourseDrawer = ({ course, isOpen, onClose, onClick }) => {
+
+
     if (!course) return null;
 
     return (
@@ -222,6 +223,7 @@ const CourseDrawer = ({ course, isOpen, onClose }) => {
                             {/* Enrollment Button - Sticky on Mobile */}
                             <div className="sticky bottom-0 left-0 right-0 bg-white pt-4 pb-2 md:pb-0 border-t md:border-t-0 border-gray-200 -mx-6 px-6 md:mx-0 md:px-0 md:static">
                                 <motion.button
+                                    onClick={onClick}
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                     className="w-full bg-gradient-to-r from-[#0f3069] to-[#1a4d8f] hover:from-[#ff6575] hover:to-[#ff8591] text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl text-lg"
@@ -247,7 +249,7 @@ const Courses = () => {
     const [displayedCourses, setDisplayedCourses] = useState([]);
     const [selectedCourse, setSelectedCourse] = useState(null);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
+    const [formLoading, setFormLoading] = useState(false);
     // 🔥 Fetch Courses From Firebase
     useEffect(() => {
         const fetchCourses = async () => {
@@ -278,11 +280,16 @@ const Courses = () => {
             }
 
             if (searchTerm.trim() !== "") {
+                const term = searchTerm.toLowerCase();
+
                 filtered = filtered.filter(course =>
-                    course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    course.description.toLowerCase().includes(searchTerm.toLowerCase())
+                    Object.values(course)
+                        .join(" ")
+                        .toLowerCase()
+                        .includes(term)
                 );
             }
+
 
             setDisplayedCourses(filtered);
         }, 400);
@@ -313,215 +320,233 @@ const Courses = () => {
         };
     }, [isDrawerOpen]);
 
+
+    const playStoreLink =
+        "https://play.google.com/store/apps/details?id=com.kautilyalaw.android";
+
+    const handleFormSubmit = (e) => {
+        e.preventDefault(); // form reload stop
+
+        setFormLoading(true); // loader visible
+
+        setTimeout(() => {
+            window.location.href = playStoreLink;
+        }, 2000);
+    };
+
     return (
-        <div className="flex flex-col w-full">
-            {/* Enhanced Hero Section */}
-            <section className="w-full relative bg-gradient-to-br from-[#0f3069] via-[#1a4d8f] to-[#0f3069] py-32 text-center mt-40 overflow-hidden">
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-20 left-10 w-72 h-72 bg-[#ff6575] rounded-full blur-3xl"></div>
-                    <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-400 rounded-full blur-3xl"></div>
-                </div>
-                <div className="relative z-10">
-                    <motion.h2
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                        className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-4"
-                    >
-                        Indian Govt Exams
-                    </motion.h2>
-                    <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.2 }}
-                        className="text-gray-200 text-lg sm:text-xl mt-4 max-w-3xl mx-auto px-4"
-                    >
-                        Master your preparation with expert-curated courses designed for success
-                    </motion.p>
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.6, delay: 0.4 }}
-                        className="mt-8 flex gap-4 justify-center items-center text-white flex-wrap px-4"
-                    >
-                        <div className="flex items-center gap-2">
-                            <Users className="h-5 w-5 text-[#ff6575]" />
-                            <span className="font-semibold">10,000+ Students</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Award className="h-5 w-5 text-[#ff6575]" />
-                            <span className="font-semibold">Expert Instructors</span>
-                        </div>
-                    </motion.div>
-                </div>
-            </section>
+        <>
 
-            {/* Enhanced Filters + Search */}
-            <div className="w-full flex flex-col items-center py-10 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
-                <div className="w-full max-w-6xl flex flex-col lg:flex-row items-center justify-between gap-6">
+            <div className="flex flex-col w-full">
+                {/* Enhanced Hero Section */}
+                <section className="w-full relative bg-gradient-to-br from-[#0f3069] via-[#1a4d8f] to-[#0f3069] py-32 text-center mt-40 overflow-hidden">
+                    <div className="absolute inset-0 opacity-10">
+                        <div className="absolute top-20 left-10 w-72 h-72 bg-[#ff6575] rounded-full blur-3xl"></div>
+                        <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-400 rounded-full blur-3xl"></div>
+                    </div>
+                    <div className="relative z-10">
+                        <motion.h2
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6 }}
+                            className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-4"
+                        >
+                            Indian Govt Exams
+                        </motion.h2>
+                        <motion.p
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: 0.2 }}
+                            className="text-gray-200 text-lg sm:text-xl mt-4 max-w-3xl mx-auto px-4"
+                        >
+                            Master your preparation with expert-curated courses designed for success
+                        </motion.p>
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.6, delay: 0.4 }}
+                            className="mt-8 flex gap-4 justify-center items-center text-white flex-wrap px-4"
+                        >
+                            <div className="flex items-center gap-2">
+                                <Users className="h-5 w-5 text-[#ff6575]" />
+                                <span className="font-semibold">10,000+ Students</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Award className="h-5 w-5 text-[#ff6575]" />
+                                <span className="font-semibold">Expert Instructors</span>
+                            </div>
+                        </motion.div>
+                    </div>
+                </section>
 
-                    {/* Category Buttons */}
-                    <div className="flex flex-wrap justify-center gap-3 w-full">
-                        {examCategories.map((cat, index) => (
-                            <motion.button
-                                key={index}
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => setActiveCategory(cat.name)}
-                                className={`flex items-center gap-2 px-5 py-2.5 rounded-full border-2 text-sm sm:text-base font-bold transition-all duration-300 shadow-md
+                {/* Enhanced Filters + Search */}
+                <div className="w-full flex flex-col items-center py-10 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
+                    <div className="w-full max-w-6xl flex flex-col lg:flex-row items-center justify-between gap-6">
+
+                        {/* Category Buttons */}
+                        <div className="flex flex-wrap justify-center gap-3 w-full">
+                            {examCategories.map((cat, index) => (
+                                <motion.button
+                                    key={index}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => setActiveCategory(cat.name)}
+                                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full border-2 text-sm sm:text-base font-bold transition-all duration-300 shadow-md
                                     ${activeCategory === cat.name
-                                        ? "bg-gradient-to-r from-[#ff6575] to-[#ff8591] text-white border-[#ff6575] shadow-lg shadow-[#ff6575]/50"
-                                        : "bg-white text-gray-700 border-gray-300 hover:border-[#ff6575] hover:shadow-lg"
-                                    }`}
-                            >
-                                <cat.icon className={`h-5 w-5 ${activeCategory === cat.name ? "text-white" : "text-[#ff6575]"}`} />
-                                {cat.name}
-                            </motion.button>
-                        ))}
-                    </div>
-
-                    {/* Enhanced Search Bar */}
-                    <motion.div
-                        whileHover={{ scale: 1.02 }}
-                        className="relative w-full max-w-xs mx-auto"
-                    >
-                        <input
-                            type="text"
-                            placeholder="Search courses..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-12 pr-4 py-3 rounded-full border-2 border-gray-300 focus:border-[#0f3069] focus:ring-4 focus:ring-[#0f3069]/20 outline-none text-sm sm:text-base w-full shadow-md transition-all duration-300"
-                        />
-                        <Search className="absolute top-1/2 left-4 transform -translate-y-1/2 h-5 w-5 text-[#ff6575]" />
-                    </motion.div>
-                </div>
-            </div>
-
-            {/* Enhanced Courses Grid */}
-            <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-7xl mx-auto">
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
-                        <AnimatePresence>
-                            {displayedCourses.length > 0 ? (
-                                displayedCourses.map((course, index) => (
-                                    <motion.div
-                                        key={course.id}
-                                        initial={{ opacity: 0, y: 50 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: 50 }}
-                                        transition={{ duration: 0.5, delay: index * 0.1 }}
-                                        whileHover={{ y: -10, transition: { duration: 0.3 } }}
-                                        onClick={() => handleCourseClick(course)}
-                                        className="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 border-t-4 border-[#ff6575] overflow-hidden group cursor-pointer"
-                                    >
-                                        {/* Thumbnail with Overlay */}
-                                        <div className="relative h-48 overflow-hidden">
-                                            {course.thumbnail ? (
-                                                <img
-                                                    src={course.thumbnail}
-                                                    alt={course.title}
-                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full bg-gradient-to-br from-[#0f3069] to-[#1a4d8f] flex items-center justify-center">
-                                                    <course.icon className="h-20 w-20 text-white opacity-50" />
-                                                </div>
-                                            )}
-                                            <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg">
-                                                <span className="text-[#0f3069] font-bold text-sm">{course.category}</span>
-                                            </div>
-                                            {course.students > 0 && (
-                                                <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2">
-                                                    <TrendingUp className="h-4 w-4 text-[#ff6575]" />
-                                                    <span className="text-white font-semibold text-xs">{course.students} Students</span>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div className="p-6">
-                                            {/* Title with Icon */}
-                                            <div className="flex items-start gap-3 mb-3">
-                                                <div className="p-2 bg-gradient-to-br from-[#ff6575] to-[#ff8591] rounded-lg shadow-md">
-                                                    <course.icon className="h-5 w-5 text-white" />
-                                                </div>
-                                                <h3 className="text-xl font-bold text-[#0f3069] leading-tight flex-1">
-                                                    {course.title}
-                                                </h3>
-                                            </div>
-
-                                            <p className="text-gray-600 mb-4 text-sm line-clamp-2">{course.description}</p>
-
-                                            {/* Rating */}
-                                            {course.rating && (
-                                                <div className="flex items-center gap-2 mb-4">
-                                                    <StarRating rating={course.rating} />
-                                                    <span className="text-sm font-semibold text-gray-700">
-                                                        {course.rating} ({course.students || 0})
-                                                    </span>
-                                                </div>
-                                            )}
-
-                                            {/* Course Info */}
-                                            <div className="flex items-center justify-between mb-5 text-sm">
-                                                <div className="flex items-center gap-1.5 text-gray-600">
-                                                    <Clock className="h-4 w-4 text-[#ff6575]" />
-                                                    <span className="font-semibold">
-                                                        {course.durationValue} {course.durationType}
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center gap-1.5 text-gray-600">
-                                                    <BookOpen className="h-4 w-4 text-[#ff6575]" />
-                                                    <span className="font-semibold">{course.lectures} Lectures</span>
-                                                </div>
-                                            </div>
-
-                                            {/* Level Badge */}
-                                            {course.level && (
-                                                <div className="mb-4">
-                                                    <span className="inline-block px-3 py-1 bg-gradient-to-r from-blue-50 to-blue-100 text-[#0f3069] text-xs font-bold rounded-full border border-blue-200">
-                                                        {course.level}
-                                                    </span>
-                                                </div>
-                                            )}
-
-                                            {/* View Details Button */}
-                                            <motion.button
-                                                whileHover={{ scale: 1.02 }}
-                                                whileTap={{ scale: 0.98 }}
-                                                className="w-full bg-gradient-to-r from-[#0f3069] to-[#1a4d8f] hover:from-[#ff6575] hover:to-[#ff8591] text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
-                                            >
-                                                View Details
-                                            </motion.button>
-                                        </div>
-                                    </motion.div>
-                                ))
-                            ) : (
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="col-span-full flex flex-col items-center justify-center py-20"
+                                            ? "bg-gradient-to-r from-[#ff6575] to-[#ff8591] text-white border-[#ff6575] shadow-lg shadow-[#ff6575]/50"
+                                            : "bg-white text-gray-700 border-gray-300 hover:border-[#ff6575] hover:shadow-lg"
+                                        }`}
                                 >
-                                    <Search className="h-20 w-20 text-gray-300 mb-4" />
-                                    <p className="text-center text-gray-500 text-xl font-semibold">
-                                        No courses found.
-                                    </p>
-                                    <p className="text-center text-gray-400 text-sm mt-2">
-                                        Try adjusting your filters or search terms
-                                    </p>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                                    <cat.icon className={`h-5 w-5 ${activeCategory === cat.name ? "text-white" : "text-[#ff6575]"}`} />
+                                    {cat.name}
+                                </motion.button>
+                            ))}
+                        </div>
+
+                        {/* Enhanced Search Bar */}
+                        <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            className="relative w-full max-w-xs mx-auto"
+                        >
+                            <input
+                                type="text"
+                                placeholder="Search courses..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="pl-12 pr-4 py-3 rounded-full border-2 border-gray-300 focus:border-[#0f3069] focus:ring-4 focus:ring-[#0f3069]/20 outline-none text-sm sm:text-base w-full shadow-md transition-all duration-300"
+                            />
+                            <Search className="absolute top-1/2 left-4 transform -translate-y-1/2 h-5 w-5 text-[#ff6575]" />
+                        </motion.div>
                     </div>
                 </div>
-            </div>
 
-            {/* Course Details Drawer */}
-            <CourseDrawer
-                course={selectedCourse}
-                isOpen={isDrawerOpen}
-                onClose={handleCloseDrawer}
-            />
-        </div>
+                {/* Enhanced Courses Grid */}
+                <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
+                            <AnimatePresence>
+                                {displayedCourses.length > 0 ? (
+                                    displayedCourses.map((course, index) => (
+                                        <motion.div
+                                            key={course.id}
+                                            initial={{ opacity: 0, y: 50 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 50 }}
+                                            transition={{ duration: 0.5, delay: index * 0.1 }}
+                                            whileHover={{ y: -10, transition: { duration: 0.3 } }}
+                                            onClick={() => handleCourseClick(course)}
+                                            className="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 border-t-4 border-[#ff6575] overflow-hidden group cursor-pointer"
+                                        >
+                                            {/* Thumbnail with Overlay */}
+                                            <div className="relative h-48 overflow-hidden">
+                                                {course.thumbnail ? (
+                                                    <img
+                                                        src={course.thumbnail}
+                                                        alt={course.title}
+                                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full bg-gradient-to-br from-[#0f3069] to-[#1a4d8f] flex items-center justify-center">
+                                                        <course.icon className="h-20 w-20 text-white opacity-50" />
+                                                    </div>
+                                                )}
+                                                <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg">
+                                                    <span className="text-[#0f3069] font-bold text-sm">{course.category}</span>
+                                                </div>
+                                                {course.students > 0 && (
+                                                    <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2">
+                                                        <TrendingUp className="h-4 w-4 text-[#ff6575]" />
+                                                        <span className="text-white font-semibold text-xs">{course.students} Students</span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="p-6">
+                                                {/* Title with Icon */}
+                                                <div className="flex items-start gap-3 mb-3">
+                                                    <div className="p-2 bg-gradient-to-br from-[#ff6575] to-[#ff8591] rounded-lg shadow-md">
+                                                        <course.icon className="h-5 w-5 text-white" />
+                                                    </div>
+                                                    <h3 className="text-xl font-bold text-[#0f3069] leading-tight flex-1">
+                                                        {course.title}
+                                                    </h3>
+                                                </div>
+
+                                                <p className="text-gray-600 mb-4 text-sm line-clamp-2">{course.description}</p>
+
+                                                {/* Rating */}
+                                                {course.rating && (
+                                                    <div className="flex items-center gap-2 mb-4">
+                                                        <StarRating rating={course.rating} />
+                                                        <span className="text-sm font-semibold text-gray-700">
+                                                            {course.rating} ({course.students || 0})
+                                                        </span>
+                                                    </div>
+                                                )}
+
+                                                {/* Course Info */}
+                                                <div className="flex items-center justify-between mb-5 text-sm">
+                                                    <div className="flex items-center gap-1.5 text-gray-600">
+                                                        <Clock className="h-4 w-4 text-[#ff6575]" />
+                                                        <span className="font-semibold">
+                                                            {course.durationValue} {course.durationType}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5 text-gray-600">
+                                                        <BookOpen className="h-4 w-4 text-[#ff6575]" />
+                                                        <span className="font-semibold">{course.lectures} Lectures</span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Level Badge */}
+                                                {course.level && (
+                                                    <div className="mb-4">
+                                                        <span className="inline-block px-3 py-1 bg-gradient-to-r from-blue-50 to-blue-100 text-[#0f3069] text-xs font-bold rounded-full border border-blue-200">
+                                                            {course.level}
+                                                        </span>
+                                                    </div>
+                                                )}
+
+                                                {/* View Details Button */}
+                                                <motion.button
+                                                    whileHover={{ scale: 1.02 }}
+                                                    whileTap={{ scale: 0.98 }}
+                                                    className="w-full bg-gradient-to-r from-[#0f3069] to-[#1a4d8f] hover:from-[#ff6575] hover:to-[#ff8591] text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
+                                                >
+                                                    View Details
+                                                </motion.button>
+                                            </div>
+                                        </motion.div>
+                                    ))
+                                ) : (
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        className="col-span-full flex flex-col items-center justify-center py-20"
+                                    >
+                                        <Search className="h-20 w-20 text-gray-300 mb-4" />
+                                        <p className="text-center text-gray-500 text-xl font-semibold">
+                                            No courses found.
+                                        </p>
+                                        <p className="text-center text-gray-400 text-sm mt-2">
+                                            Try adjusting your filters or search terms
+                                        </p>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Course Details Drawer */}
+                <CourseDrawer
+                    course={selectedCourse}
+                    isOpen={isDrawerOpen}
+                    onClose={handleCloseDrawer}
+                    onClick={handleFormSubmit}
+                />
+            </div>
+        </>
     );
 };
 
