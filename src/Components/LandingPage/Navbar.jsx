@@ -65,6 +65,18 @@ export default function Navbar() {
         enqueueSnackbar("Logged out successfully!", { variant: "success" });
     };
 
+    /* --- Coming Soon Handler --- */
+    const handleComingSoon = () => {
+        enqueueSnackbar("Coming Soon!", {
+            variant: "info",
+            anchorOrigin: {
+                vertical: 'top',
+                horizontal: 'center',
+            }
+        });
+        setOpenAvatarMenu(false);
+    };
+
     return (
         <>
             {loading && <CenterLoader />}
@@ -102,8 +114,8 @@ export default function Navbar() {
                                 </NavLink>
                             ))}
 
-                            {/* Login Button (if not logged in) */}
-                            {!user && (
+                            {/* Login Button (if not logged in) - Only show when loading is false */}
+                            {!loading && !user && (
                                 <button
                                     onClick={() => setOpenLogin(true)}
                                     className="flex items-center gap-2 px-5 py-2.5 bg-[#ff6575] text-white rounded-full hover:bg-[#ff4560] transition-all shadow-lg hover:shadow-xl"
@@ -112,8 +124,8 @@ export default function Navbar() {
                                 </button>
                             )}
 
-                            {/* USER AVATAR DROPDOWN (Desktop) */}
-                            {user && (
+                            {/* USER AVATAR DROPDOWN (Desktop) - Only show when loading is false */}
+                            {!loading && user && (
                                 <div className="relative">
                                     <div
                                         ref={avatarRef}
@@ -142,6 +154,7 @@ export default function Navbar() {
                                             {/* Menu Items */}
                                             <div className="py-1">
                                                 <button
+                                                    onClick={handleComingSoon}
                                                     className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors"
                                                 >
                                                     <User size={18} className="text-[#113471]" />
@@ -149,6 +162,7 @@ export default function Navbar() {
                                                 </button>
 
                                                 <button
+                                                    onClick={handleComingSoon}
                                                     className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 transition-colors"
                                                 >
                                                     <Settings size={18} className="text-[#113471]" />
@@ -172,23 +186,27 @@ export default function Navbar() {
                             )}
                         </div>
 
-                        {/* MOBILE: Avatar or Hamburger */}
+                        {/* MOBILE: Avatar or Hamburger - Only show when loading is false */}
                         <div className="lg:hidden">
-                            {user ? (
-                                <div
-                                    onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                    className="h-10 w-10 bg-gradient-to-br from-[#113471] to-[#1a4d8f] text-white rounded-full flex items-center justify-center font-semibold cursor-pointer border-2 border-white shadow-lg"
-                                >
-                                    {getInitials(user.displayName)}
-                                </div>
-                            ) : (
-                                <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                                    {isMenuOpen ? (
-                                        <X size={30} className="text-[#ff6575]" />
+                            {!loading && (
+                                <>
+                                    {user ? (
+                                        <div
+                                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                            className="h-10 w-10 bg-gradient-to-br from-[#113471] to-[#1a4d8f] text-white rounded-full flex items-center justify-center font-semibold cursor-pointer border-2 border-white shadow-lg"
+                                        >
+                                            {getInitials(user.displayName)}
+                                        </div>
                                     ) : (
-                                        <Menu size={30} className="text-[#ff6575]" />
+                                        <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                                            {isMenuOpen ? (
+                                                <X size={30} className="text-[#ff6575]" />
+                                            ) : (
+                                                <Menu size={30} className="text-[#ff6575]" />
+                                            )}
+                                        </button>
                                     )}
-                                </button>
+                                </>
                             )}
                         </div>
                     </div>
@@ -229,6 +247,27 @@ export default function Navbar() {
                                         {user.email}
                                     </p>
                                 </div>
+
+                                {/* Profile & Settings Buttons in Mobile */}
+                                <button
+                                    onClick={() => {
+                                        handleComingSoon();
+                                        setIsMenuOpen(false);
+                                    }}
+                                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-[#113471] text-[#113471] font-medium hover:bg-blue-50 transition-all"
+                                >
+                                    <User size={20} /> My Profile
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        handleComingSoon();
+                                        setIsMenuOpen(false);
+                                    }}
+                                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-[#113471] text-[#113471] font-medium hover:bg-blue-50 transition-all"
+                                >
+                                    <Settings size={20} /> Settings
+                                </button>
 
                                 {/* Logout Button Mobile */}
                                 <button

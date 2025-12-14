@@ -20,6 +20,7 @@ import { useAuth } from "./context/AuthContext";
 import CenterLoader from "./Components/Loader/CenterLoader";
 import PrivacyPolicy from "./Components/LandingPageComponents/PrivacyPolicy";
 import TermsAndConditions from "./Components/LandingPageComponents/TermsAndConditions";
+import ScrollToTop from "./Components/ScrollToTop";
 
 function App() {
   const { loading } = useAuth();   // 🔥 yaha useAuth safe hai kyuki SnackbarProvider wrapper ke andar hoga
@@ -30,6 +31,7 @@ function App() {
       {/* Loader globally work karega */}
 
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
 
           {/* USER WEBSITE ROUTES */}
