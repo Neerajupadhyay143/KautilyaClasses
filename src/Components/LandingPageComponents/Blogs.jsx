@@ -191,8 +191,8 @@ const BlogsPage = () => {
                                                 setSelectedTag(null);
                                             }}
                                             className={`p-3 rounded-xl text-left font-semibold transition-all ${selectedCategory === cat
-                                                    ? "bg-gradient-to-r from-[#ff6575] to-[#ff8591] text-white shadow-lg"
-                                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                                ? "bg-gradient-to-r from-[#ff6575] to-[#ff8591] text-white shadow-lg"
+                                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                                                 }`}
                                         >
                                             {cat}
@@ -216,8 +216,8 @@ const BlogsPage = () => {
                                                 whileTap={{ scale: 0.95 }}
                                                 onClick={() => setSelectedTag(tag)}
                                                 className={`px-3 py-1.5 rounded-full text-sm cursor-pointer font-semibold transition-all ${selectedTag === tag
-                                                        ? "bg-gradient-to-r from-[#ff6575] to-[#ff8591] text-white shadow-md"
-                                                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                                    ? "bg-gradient-to-r from-[#ff6575] to-[#ff8591] text-white shadow-md"
+                                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                                                     }`}
                                             >
                                                 #{tag}
@@ -282,6 +282,24 @@ const BlogsPage = () => {
                                             <h3 className="text-xl font-bold text-[#0f3069] mb-3 line-clamp-2 leading-tight">
                                                 {blog.title}
                                             </h3>
+
+                                            {/* 🔥 AUTHOR (frontend only) */}
+                                            <div className="flex items-center gap-2 mb-3">
+                                                {blog.authorImage && (
+                                                    <img
+                                                        src={blog.authorImage}
+                                                        alt={blog.authorName}
+                                                        className="w-8 h-8 rounded-full object-cover border"
+                                                    />
+                                                )}
+                                                <span className="text-sm text-gray-600">
+                                                    By <span className="font-semibold">
+                                                        {blog.authorName || "Admin"}
+                                                    </span>
+                                                </span>
+                                            </div>
+
+
                                             <p className="text-gray-600 text-sm line-clamp-3 mb-4">
                                                 {stripHtml(blog.content)}
                                             </p>
@@ -394,6 +412,21 @@ const BlogsPage = () => {
                                     <h2 className="text-3xl md:text-4xl font-bold text-white mb-3 leading-tight">
                                         {openBlog.title}
                                     </h2>
+                                    {/* 🔥 AUTHOR */}
+                                    <div className="flex items-center gap-3 mb-2 text-white">
+                                        {openBlog.authorImage && (
+                                            <img
+                                                src={openBlog.authorImage}
+                                                className="w-10 h-10 rounded-full object-cover border-2 border-white"
+                                            />
+                                        )}
+                                        <span className="text-sm md:text-base">
+                                            By <span className="font-semibold">
+                                                {openBlog.authorName || "Admin"}
+                                            </span>
+                                        </span>
+                                    </div>
+
                                     <div className="flex items-center gap-2 text-white">
                                         <Calendar className="h-5 w-5" />
                                         <span className="text-lg font-semibold">{formatDate(openBlog.createdAt)}</span>

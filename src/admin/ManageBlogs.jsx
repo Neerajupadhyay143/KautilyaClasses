@@ -30,6 +30,8 @@ export default function ManageBlogs() {
     const [imageUrls, setImageUrls] = useState([]);
     const [showThumbnailUpload, setShowThumbnailUpload] = useState(false);
     const [showImagesUpload, setShowImagesUpload] = useState(false);
+    const [authorImageUrl, setAuthorImageUrl] = useState("");
+    const [showAuthorUpload, setShowAuthorUpload] = useState(false);
 
     // Snackbar state
     const [snackbar, setSnackbar] = useState({
@@ -44,6 +46,8 @@ export default function ManageBlogs() {
         content: "",
         thumbnail: "",
         images: [],
+        authorName: "",
+        authorImage: "",
     };
 
     const [blogData, setBlogData] = useState(empty);
@@ -124,6 +128,8 @@ export default function ManageBlogs() {
                 content: blogData.content || "",
                 thumbnail: thumbnailUrl || "",
                 images: imageUrls || [],
+                authorName: blogData.authorName || "",
+                authorImage: authorImageUrl || "",
                 createdAt: now,
                 updatedAt: now,
             };
@@ -155,6 +161,8 @@ export default function ManageBlogs() {
                 content: blogData.content || "",
                 thumbnail: thumbnailUrl || blogData.thumbnail || "",
                 images: imageUrls.length ? imageUrls : blogData.images || [],
+                authorName: blogData.authorName || "",
+                authorImage: authorImageUrl || blogData.authorImage || "",
                 updatedAt: Date.now(),
             };
 
@@ -207,8 +215,11 @@ export default function ManageBlogs() {
             content: b.content || "",
             thumbnail: b.thumbnail || "",
             images: b.images || [],
+            authorName: b.authorName || "",
+            authorImage: b.authorImage || "",
         });
         setThumbnailUrl(b.thumbnail || "");
+        setAuthorImageUrl(b.authorImage || "");
         setImageUrls(b.images || []);
         setIsCollapseOpen(true);
     };
@@ -289,6 +300,19 @@ export default function ManageBlogs() {
                                         name="title"
                                         placeholder="Enter blog title"
                                         value={blogData.title}
+                                        onChange={handleInput}
+                                        className="border-2 border-gray-300 focus:border-[#113471] focus:ring-4 focus:ring-[#113471]/20 p-3 rounded-xl w-full outline-none transition"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block font-semibold text-gray-700 mb-2">
+                                        Author Name
+                                    </label>
+                                    <input
+                                        name="authorName"
+                                        placeholder="Enter author name"
+                                        value={blogData.authorName}
                                         onChange={handleInput}
                                         className="border-2 border-gray-300 focus:border-[#113471] focus:ring-4 focus:ring-[#113471]/20 p-3 rounded-xl w-full outline-none transition"
                                     />
@@ -386,6 +410,53 @@ export default function ManageBlogs() {
                                                 Done
                                             </button>
                                         </div>
+                                    )}
+                                </div>
+                                <div>
+                                    <label className="block font-semibold text-gray-700 mb-2">
+                                        Author Image
+                                    </label>
+
+                                    {authorImageUrl ? (
+                                        <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-gray-200">
+                                            <img
+                                                src={authorImageUrl}
+                                                alt="author"
+                                                className="w-full h-full object-cover"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setAuthorImageUrl("");
+                                                    setBlogData((s) => ({ ...s, authorImage: "" }));
+                                                }}
+                                                className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            {!showAuthorUpload ? (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowAuthorUpload(true)}
+                                                    className="w-32 h-32 rounded-full border-2 border-dashed border-blue-300 flex items-center justify-center hover:border-[#113471]"
+                                                >
+                                                    <ImagePlus className="text-[#113471]" />
+                                                </button>
+                                            ) : (
+                                                <div className="border-2 border-[#113471] rounded-xl p-4">
+                                                    <CloudinaryUpload
+                                                        onUpload={(url) => {
+                                                            setAuthorImageUrl(url);
+                                                            setBlogData((s) => ({ ...s, authorImage: url }));
+                                                            setShowAuthorUpload(false);
+                                                        }}
+                                                    />
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </div>
 
@@ -659,12 +730,12 @@ export default function ManageBlogs() {
                     >
                         <div
                             className={`px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 ${snackbar.severity === "success"
-                                    ? "bg-green-500 text-white"
-                                    : snackbar.severity === "error"
-                                        ? "bg-red-500 text-white"
-                                        : snackbar.severity === "warning"
-                                            ? "bg-yellow-500 text-white"
-                                            : "bg-blue-500 text-white"
+                                ? "bg-green-500 text-white"
+                                : snackbar.severity === "error"
+                                    ? "bg-red-500 text-white"
+                                    : snackbar.severity === "warning"
+                                        ? "bg-yellow-500 text-white"
+                                        : "bg-blue-500 text-white"
                                 }`}
                         >
                             <span className="font-semibold">{snackbar.message}</span>
