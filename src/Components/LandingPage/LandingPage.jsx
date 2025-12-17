@@ -196,24 +196,28 @@ export default function LandingPage() {
                                         <form className="flex flex-col gap-3" onSubmit={handleFormSubmit}>
                                             <input
                                                 type="text"
+                                                required
                                                 placeholder="Name"
                                                 className="border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                                             />
 
                                             <input
                                                 type="email"
+                                                required
                                                 placeholder="Email"
                                                 className="border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                                             />
 
                                             <input
                                                 type="text"
+                                                required
                                                 placeholder="Contact Number"
                                                 className="border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                                             />
 
                                             {/* DROPDOWN ADDED */}
                                             <select
+                                                required
                                                 className="border px-3 py-2 rounded-md text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
                                             >
                                                 <option value="" disabled selected>
@@ -227,6 +231,7 @@ export default function LandingPage() {
                                             </select>
 
                                             <textarea
+                                                required
                                                 placeholder="Enter Your Query"
                                                 className="border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                                             ></textarea>
@@ -236,7 +241,7 @@ export default function LandingPage() {
                                                 className="border-2 border-blue-500 text-blue-500 px-4 py-2 rounded-md font-semibold hover:bg-blue-50 transition flex items-center justify-center"
                                             >
 
-                                                "Send Message"
+                                                Send Message
                                             </button>
 
 
